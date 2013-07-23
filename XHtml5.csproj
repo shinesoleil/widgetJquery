@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B956E753-6A53-4CF8-9A7E-EFCC6BD64A53}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Divaltohtml</RootNamespace>
+    <AssemblyName>XHtml5</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <UseIISExpress>false</UseIISExpress>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>4.0</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DhHw">
+      <HintPath>..\..\..\..\..\..\..\divalto\sys\DhHw.dll</HintPath>
+    </Reference>
+    <Reference Include="Dhsystem">
+      <HintPath>..\..\..\..\..\..\..\divalto\sys\Dhsystem.dll</HintPath>
+    </Reference>
+    <Reference Include="DhSystemTools, Version=2.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\divalto\sys\DhSystemTools.dll</HintPath>
+    </Reference>
+    <Reference Include="DHTransportLC, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\divalto\sys\DHTransportLC.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="CaseACocher.html" />
+    <Content Include="HTMLPage1.htm" />
+    <Content Include="About.aspx" />
+    <Content Include="appelsajax.aspx" />
+    <Content Include="menu.html" />
+    <Content Include="Scripts\DivaltoHtml5.js" />
+    <Content Include="Scripts\divaltoWidgets\caseACocher.js" />
+    <Content Include="Scripts\divaltoWidgets\grille.js" />
+    <Content Include="Scripts\divaltoWidgets\groupBox.js" />
+    <Content Include="Scripts\divaltoWidgets\onglet.js" />
+    <Content Include="Styles\DivaltoDefault.css" />
+    <Content Include="Styles\divaltoWidgets\caseACocher.css" />
+    <Content Include="Styles\divaltoWidgets\grille.css" />
+    <Content Include="Styles\divaltoWidgets\groupBox.css" />
+    <Content Include="Styles\divaltoWidgets\onglet.css" />
+    <Content Include="Styles\jquery-ui-1.10.1.custom.css" />
+    <Content Include="Styles\ResetStyles.css" />
+    <Content Include="Styles\Site.css" />
+    <Content Include="Default.aspx" />
+    <Content Include="Global.asax" />
+    <Content Include="Web.config" />
+    <Content Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="WebForm1.aspx" />
+    <Content Include="workWidget-MessageBox.html" />
+    <Content Include="workWidget-Radio.html" />
+    <Content Include="WorkWidGet.html" />
+    <Content Include="workWidGet_Onglet.html" />
+    <Content Include="workWidget_grille.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="aaafaire.cs" />
+    <Compile Include="About.aspx.cs">
+      <DependentUpon>About.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="About.aspx.designer.cs">
+      <DependentUpon>About.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="appelsajax.aspx.cs">
+      <DependentUpon>appelsajax.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="appelsajax.aspx.designer.cs">
+      <DependentUpon>appelsajax.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Default.aspx.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Default.aspx.designer.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Site.Master.cs">
+      <DependentUpon>Site.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Site.Master.designer.cs">
+      <DependentUpon>Site.Master</DependentUpon>
+    </Compile>
+    <Compile Include="WebForm1.aspx.cs">
+      <DependentUpon>WebForm1.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="WebForm1.aspx.designer.cs">
+      <DependentUpon>WebForm1.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="XHtmlCheckBox.cs" />
+    <Compile Include="XHtmlComboBox.cs" />
+    <Compile Include="XHtmlGlobal.cs" />
+    <Compile Include="XHtmlApplication.cs" />
+    <Compile Include="XHtmlButton.cs" />
+    <Compile Include="XHtmlDataGrid\Width.cs" />
+    <Compile Include="XHtmlDataGrid\XHtmlDataGrid.cs" />
+    <Compile Include="XHtmlDataGrid\XHtmlDataGridColumnHeader.cs" />
+    <Compile Include="XHtmlDataGrid\XHtmlDataGridRessources.cs" />
+    <Compile Include="XHtmlDataGrid\XHtmlDragDropHelper.cs" />
+    <Compile Include="XHtmlDataGrid\XHtmlGenericCell.cs" />
+    <Compile Include="XHtmlDataGrid\XHtmlGenericColumn.cs" />
+    <Compile Include="XHtmlDataGrid\XHtmlPresentationCell.cs" />
+    <Compile Include="XHtmlDataGrid\XHtmlRow.cs" />
+    <Compile Include="XHtmlDataGrid\XHtmlTextBoxCell.cs" />
+    <Compile Include="XHtmlDataGrid\XHtmlTextBoxColumn.cs" />
+    <Compile Include="XHtmlErrors.cs" />
+    <Compile Include="XHtmlGroupBox.cs" />
+    <Compile Include="XHtmlImage.cs" />
+    <Compile Include="XHtmlLabel.cs" />
+    <Compile Include="XHtmlMenu.cs" />
+    <Compile Include="XHtmlObjet.cs" />
+    <Compile Include="XHtmlOutils.cs" />
+    <Compile Include="XHtmlPage.cs" />
+    <Compile Include="XHtmlRessources.cs" />
+    <Compile Include="XHtmlTabControl.cs" />
+    <Compile Include="XHtmlTabItem.cs" />
+    <Compile Include="XHtmlTextBox.cs" />
+    <Compile Include="XHtmlToolBar.cs" />
+    <Compile Include="XHtmlWindow.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Account\Web.config" />
+    <Content Include="Site.Master" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <SaveServerSettingsInUserFile>True</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

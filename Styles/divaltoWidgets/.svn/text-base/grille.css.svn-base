@@ -1,0 +1,7 @@
+﻿
+        .divalto-resizable-helper-e {
+            border-right:solid 2px;
+        }
+        .divalto-resizable-helper-s {
+            border-bottom:solid 2px;
+        }

@@ -1,0 +1,7 @@
+﻿
+
+        .divaltoTabs, .cssdivalto .divaltoTabs {
+            padding:0px;
+            border: 1px solid #AAAAAA;
+            color: #222222;
+        }

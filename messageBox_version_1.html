@@ -1,0 +1,309 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>hao</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/ResetStyles.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/DivaltoDefault.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="Scripts/jQuery/css/smoothness/jquery-ui-1.10.1.custom.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="Scripts/jqgrid/css/ui.jqgrid.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/divaltoWidgets/onglet.css" />
+
+    <script type="text/javascript" src="scripts/jquery/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="scripts/jquery/jquery-ui-1.10.1.custom.js"></script>
+    <script src="Scripts/localStorage/jquery.storage.js" type="text/javascript"></script>
+    <script src="Scripts/divaltoWidgets/onglet.js" type="text/javascript"></script>
+
+    <!-- Pour être certain que IE execute la bonne version du fichier. Penser a effacer le cache une fois qu'on active cette option
+	-->
+    <meta http-equiv="Pragma" content="no-cache" />
+
+</head>
+<body>
+    <script>
+        $.widget("divalto.divaltoMessageBox", {
+
+            options: {
+                titre: "titre du widget",
+                mess: "texte du widget ",
+                nombreRecu: 0x142,
+                //nombreRecu : 0x | boutonParDefaut |icon | boutonType
+                //boutonType
+                //  MB_OK                   = 0L00000000
+                //  MB_OKCANCEL             = 0L00000001
+                //  MB_ABORTRETRYIGNORE     = 0L00000002
+                //  MB_YESNOCANCEL          = 0L00000003
+                //  MB_YESNO                = 0L00000004
+                //  MB_RETRYCANCEL          = 0L00000005
+                //icon
+                //  MB_ICONERROR            = 0L00000010
+                //  MB_ICONQUESTION         = 0L00000020
+                //  MB_ICONEXCLAMATION      = 0L00000030
+                //  MB_ICONINFORMATION      = 0L00000040
+                //boutonParDefaut
+                //  MB_DEFBUTTON1           = 0L00000000
+                //  MB_DEFBUTTON2           = 0L00000100
+                //  MB_DEFBUTTON3           = 0L00000200
+                valeurRetour: undefined,
+                //IDOK         = 1
+                //IDCANCEL     = 2
+                //IDABORT      = 3
+                //IDRETRY      = 4
+                //IDIGNORE     = 5
+                //IDYES        = 6
+                //IDNO         = 7
+                callback: null
+            },
+
+            boutonType: undefined,
+            icon: undefined,
+            boutonParDefaut: undefined,
+
+
+            _create: function () {
+                var nomIcon = undefined;
+                var boutonNombre = undefined;
+
+                //comparer nombreRecu en hexadécimal et 15(soit 1111) en binaire
+                this.boutonType = this.options.nombreRecu & 15;
+                //comparer nombreRecu en hexadécimal et 240(soit 11110000) en binaire
+                this.icon = this.options.nombreRecu & 240;
+                //comparer nombreRecu en hexadécimal et 3840(soit 111100000000) en binaire
+                this.boutonParDefaut = (this.options.nombreRecu & 3840) / 256;
+
+                var boutonCourant = this.boutonParDefaut;
+
+
+                switch (this.icon) {
+                    case 16: {
+                        nomIcon = "ICONERROR";
+                        break;
+                    }
+                    case 32: {
+                        nomIcon = "ICONQUESTION";
+                        break;
+                    }
+                    case 48: {
+                        nomIcon = "ICONEXCLAMATION";
+                        break;
+                    }
+                    case 64: {
+                        nomIcon = "ICONINFORMATION";
+                        break;
+                    }
+                }
+
+                //tag "cadre" comprend <p> texte
+                var cadre = $("<div id='cadre'></div>");
+                cadre.css("border", "solid 1px grey").css("overflow", "hidden").css("height", "inherit");
+                var texte = $("<p id='texte'></p>");
+                texte.css("position", "absolute").css("left", "64px").css("top", "0").css("padding-top", "30px").css("white-space", "normal")
+                    .css("overflow", "auto").css("bottom", "37px").css("font-family", "arial").css("font-size", "10px").css("right", "0");
+                var bouton = $("<div></div>");
+                bouton.css("position", "absolute").css("bottom", "0").css("height", "37px").css("width", "100%").css("left", "0").css("background", "#F0F0F0");
+                bouton.appendTo(cadre);
+                var bouton1 = $("<button style='font-size:10px;top:4px;border:solid 1px' id=1></button>");
+                var bouton2 = $("<button style='font-size:10px;top:4px;border:solid 1px' id=2></button>");
+                var bouton3 = $("<button style='font-size:10px;top:4px;border:solid 1px' id=3></button>");
+                var image = $("<img></img>");
+                //afficher l'image
+                if (this.icon != undefined) {
+                    image.attr("src", "images/" + nomIcon + ".png");
+                    image.css("float", "left").css("width", "50px").css("padding-top", "20px");
+                    image.appendTo(cadre);
+                }
+                texte.html(this.options.mess).appendTo(cadre);
+
+                //type des boutons
+                switch (this.boutonType) {
+                    case 0: {
+                        boutonNombre = 1;
+                        bouton1.attr("data-valeurRetour", 1).css("position", "absolute").css("right", "45px");
+                        bouton1.button({ label: "OK" }).appendTo(bouton);
+                        this.element.append(cadre);
+                        break;
+                    }
+                    case 1: {
+                        boutonNombre = 2;
+                        bouton1.attr("data-valeurRetour", 1).css("position", "absolute").css("right", "85px");
+                        bouton1.button({ label: "OK" }).appendTo(bouton);
+                        bouton2.attr("data-valeurRetour", 2).css("position", "absolute").css("right", "15px");
+                        bouton2.button({ label: "Annuler" }).appendTo(bouton);
+                        this.element.append(cadre);
+                        break;
+                    }
+                    case 2: {
+                        boutonNombre = 3;
+                        bouton1.attr("data-valeurRetour", 3).css("position", "absolute").css("right", "160px");
+                        bouton1.button({ label: "Abandonner" }).appendTo(bouton);
+                        bouton2.attr("data-valeurRetour", 4).css("position", "absolute").css("right", "80px");
+                        bouton2.button({ label: "Réessayer" }).appendTo(bouton);
+                        bouton3.attr("data-valeurRetour", 5).css("position", "absolute").css("right", "15px");
+                        bouton3.button({ label: "Ignorer" }).appendTo(bouton);
+                        this.element.append(cadre);
+                        break;
+                    }
+                    case 3: {
+                        boutonNombre = 3;
+                        bouton1.attr("data-valeurRetour", 6).css("position", "absolute").css("right", "130px");
+                        bouton1.button({ label: "Oui" }).appendTo(bouton);
+                        bouton2.attr("data-valeurRetour", 7).css("position", "absolute").css("right", "80px");
+                        bouton2.button({ label: "Non" }).appendTo(bouton);
+                        bouton3.attr("data-valeurRetour", 2).css("position", "absolute").css("right", "15px");
+                        bouton3.button({ label: "Annuler" }).appendTo(bouton);
+                        this.element.append(cadre);
+                        break;
+                    }
+                    case 4: {
+                        boutonNombre = 2;
+                        bouton1.attr("data-valeurRetour", 6).css("position", "absolute").css("right", "75px");
+                        bouton1.button({ label: "Oui" }).appendTo(bouton);
+                        bouton2.attr("data-valeurRetour", 7).css("position", "absolute").css("right", "15px");
+                        bouton2.button({ label: "Non" }).appendTo(bouton);
+                        this.element.append(cadre);
+                        break;
+                    }
+                    case 5: {
+                        boutonNombre = 2;
+                        bouton1.attr("data-valeurRetour", 4).css("position", "absolute").css("right", "85px");
+                        bouton1.button({ label: "Réessayer" }).appendTo(bouton);
+                        bouton2.attr("data-valeurRetour", 2).css("position", "absolute").css("right", "15px");
+                        bouton2.button({ label: "Annuler" }).appendTo(bouton);
+                        this.element.append(cadre);
+                        break;
+                    }
+
+                }
+
+                cadre.find("button").attr("tabindex", "0");
+                cadre.find("bouton[id='" + boutonCourant.toString() + "']").focus();
+
+                //calculer la taille du widget au début en récupérant la taille de <p> qui contient le message
+                var taille = $("<p></p>");
+                taille.html(this.options.mess).css("font-family", "arial").css("font-size", "10px").css("white-space", "normal").css("float", "left").css("maxWidth", "450px").css("minHeight", "50px");
+                $("body").append(taille);
+                var width = taille.width() + 50 + 10;  //50 image   10 bordure
+                var height = taille.height() + 37 + 70; // 37 button
+                taille.remove();
+                var maxH = $(document).height() - (50 + 10);
+                var maxW = $(document).width() - (37 + 70);
+                //width = Math.min(width, maxW);
+                //height = Math.min(height, maxH);
+
+                //créer le widget "MessageBox" à l'aide du widget "dialog"
+                cadre.dialog({ title: this.options.titre, width: width, height: height, minWidth: 260, minHeight: 280, maxWidth: maxW, maxHeight: maxH });
+                //changement de la partie "titre" en haut et le bouton "quitter" 
+                $("*.ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-icon-only.ui-dialog-titlebar-close").css("height", "12px").css("width", "38px").css("top", "5.5px");
+                $("*.ui-dialog-titlebar").css("background", "transparent").css("border", "none");
+
+
+
+
+
+                //les fonctionalités
+
+                //mise à jour de la taille du contenu lors de "resize"
+                cadre.on("dialogresize", function (event, ui) {
+                    var heightMaintenant = ui.size.height - 33;
+                    var widthMaintenant = ui.size.width - 23;
+                    cadre.css("width", widthMaintenant);
+                    cadre.css("height", heightMaintenant);
+                });
+
+
+                //indiquer le bouton par défaut
+                cadre.find("button[id='" + boutonCourant.toString() + "']").css("border", "2px solid dodgerblue");
+                cadre.find("button[id!='" + boutonCourant.toString() + "']").css("border", "2px solid #F0F0F0");
+
+                cadre.find("button").on("mouseover", this, function (event) {
+                    cadre.find("button").css("border", "2px solid #F0F0F0");
+                    $(this).css("border", "2px solid dodgerblue");
+                    $(this).focus();
+                });
+
+                cadre.find("button").on("mouseout", this, function (event) {
+                    $(this).css("border", "2px solid #F0F0F0");
+                    cadre.find("button[id='" + boutonCourant.toString() + "']").css("border", "2px solid dodgerblue");
+                    cadre.find("button[id='" + boutonCourant.toString() + "']").focus();
+                });
+
+                //événement du clavier 
+                this.element.keydown(this, function (event) {
+                    //si on clique sur "flèche gauche"
+                    if (event.keyCode == 37 || event.keyCode == 38)
+                        boutonAGauche();
+                    //si on clique sur "flèche droite"
+                    if (event.keyCode == 39 || event.keyCode == 40)
+                        boutonADroite();
+                    //si on clique sur "Ech"
+                    if (event.keyCode == 27) {
+                        cadre.dialog("close");
+                        event.data.options.valeurRetour = 2;
+                        alert(event.data.options.valeurRetour);
+                    }
+                    //si on clique sur "Entrée" ou "Espace", on fait le choix en cliquant
+                    if (event.keyCode == 13 || event.keyCode == 32) {
+                        cadre.find("button[id='" + boutonCourant.toString() + "']").click();
+                    }
+                });
+
+
+                //événement du souris
+                cadre.find("button").on("click", this, function (event) {
+                    event.data.options.valeurRetour = $(this).attr("data-valeurRetour");
+                    cadre.dialog("close");
+                    event.data.options.callback(event.data.options.valeurRetour);
+                    //                    alert(event.data.options.valeurRetour);
+                });
+
+
+                //les fonctions
+
+                //déplacer le bouton séléctionné à gauche
+                function boutonAGauche() {
+                    cadre.find("button:eq(" + (boutonCourant - 1) + ")").css("border", "2px solid #F0F0F0");;
+                    if (boutonCourant == 1)
+                        boutonCourant = boutonNombre;
+                    else
+                        boutonCourant--;
+                    cadre.find("button:eq(" + (boutonCourant - 1) + ")").css("border", "2px solid dodgerblue");
+                    cadre.find("button:eq(" + (boutonCourant - 1) + ")").focus();
+                };
+
+                //déplacer le bouton séléctionné à droite
+                function boutonADroite() {
+                    cadre.find("button:eq(" + (boutonCourant - 1) + ")").css("border", "2px solid #F0F0F0");
+                    if (boutonCourant == boutonNombre)
+
+                        boutonCourant = 1;
+                    else
+                        boutonCourant++;
+                    cadre.find("button:eq(" + (boutonCourant - 1) + ")").css("border", "2px solid dodgerblue");
+                    cadre.find("button:eq(" + (boutonCourant - 1) + ")").focus();
+                };
+
+            }
+
+        });
+
+
+
+        $(function () {
+            $("body").divaltoMessageBox({
+                titre: "Divalto",
+                callback: function (v) {
+                    alert("l'utilisateur a tapé" + v);
+                },
+                mess: "hello"
+                //mess: "La rémunération du livret A est révisée deux fois par an par le gouvernement, sur proposition de la Banque de France. Deux formules de calcul coexistent : le nouveau taux"
+                //mess: "La rémunération du livret A est révisée deux fois par an par le gouvernement, sur proposition de la Banque de France. Deux formules de calcul coexistent : le nouveau taux peut être calé sur la moyenne entre l’inflation et le taux des prêts entre banques; il peut également correspondre à l’inflation seule, majorée d’un quart de point. C’est la solution la plus avantageuse pour les épargnants qui est retenue. Or, les taux interbancaires sont à des niveaux historiquement bas, et l’inflation (0,9% sur un an en juin) est en baisse quasi-continue depuis un an. La rémunération du livret A ne peut donc, à son tour, s’orienter qu’à la baisse."
+                //mess: "C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox C'est un widget MessageBox"
+            });
+
+        });
+
+
+    </script>
+</body>
+</html>
+

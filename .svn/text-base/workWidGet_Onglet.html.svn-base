@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<link rel="stylesheet" type="text/css" media="screen" href="styles/ResetStyles.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="styles/DivaltoDefault.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="Scripts/jQuery/css/smoothness/jquery-ui-1.10.1.custom.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="Scripts/jqgrid/css/ui.jqgrid.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/divaltoWidgets/onglet.css" />
+
+	<script type="text/javascript" src="scripts/jquery/jquery-1.9.1.js"></script>
+	<script type="text/javascript" src="scripts/jquery/jquery-ui-1.10.1.custom.js"></script>
+	<script src="Scripts/localStorage/jquery.storage.js" type="text/javascript"></script>
+	<script src="Scripts/divaltoWidgets/onglet.js" type="text/javascript"></script>
+
+	<!-- Pour être certain que IE execute la bonne version du fichier. Penser a effacer le cache une fois qu'on active cette option
+	-->
+	<meta http-equiv="Pragma" content="no-cache">		
+
+</head>
+<body id="monbody">
+
+
+    <style>
+        .autreCoul
+        {
+            background-color:green;
+        }
+
+        .maCouleur
+        {
+            background-color:blue;
+        }
+
+        .icodivalto_1 {
+            background-image:url("images/majeur.bmp");
+            
+        }
+
+        .maPolice {
+            font-family:'Arial Rounded MT';
+            font-size:10px;
+        }
+
+    </style>
+    <script>
+        /*
+Je piege la fonction val de jquery
+Lorsqu'elle est appelée pour modifier une valeur, j'appelle la fonction standard et ensuite je declenche changeval
+*/
+        (function ($) {
+            var originalVal = $.fn.val;
+            $.fn.val = function (value) {
+                if (typeof value != 'undefined') {
+                    var ret = originalVal.call(this, value);
+                    this.trigger("changeval");
+                    return ret;
+                }
+                return originalVal.call(this);
+            };
+        })(jQuery);
+
+
+        var chaine = '{"hauteurImage":16,"items":[{"bitmap":1,"bulle":"bubull","fond":null,"numeroPage":13,"texte":"premier","visibilite":0},{"bitmap":1,"bulle":"bubull","fond":null,"numeroPage":13,"texte":"premier","visibilite":0},{"bitmap":1,"bulle":"bubull","fond":null,"numeroPage":13,"texte":"premier","visibilite":0},{"bitmap":1,"bulle":"bubull","fond":null,"numeroPage":13,"texte":"premier","visibilite":0},{"bitmap":1,"bulle":"bubull","fond":null,"numeroPage":13,"texte":"premier","visibilite":0},{"bitmap":1,"bulle":"bubull","fond":null,"numeroPage":13,"texte":"premier","visibilite":0},{"bitmap":null,"bulle":"nulle","fond":null,"numeroPage":14,"fond":"maCouleur","texte":"second","visibilite":0}],"largeurImage":16,"multiLigne":false,"padding":"padd_6","pointArret":0,"police":"pol_10","pageCourante":14}';
+        $(document).ready(function () {
+
+            $(document).on("clickOnglet", function (data, params) {
+                alert("onglet" + JSON.stringify(params));
+            });
+
+
+            params = $.parseJSON(chaine);
+
+            var $o = $("<div></div>").divaltoOnglet(params);
+            $("#monbody").append($o);
+
+            $o.width("300px");
+            $o.height("300px");
+
+            $o.attr("id", "idonglet");
+
+
+
+
+
+        });
+
+
+
+
+        </script>
+
+
+
+</body>
+</html>

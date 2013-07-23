@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XHtml5", "XHtml5.csproj", "{B956E753-6A53-4CF8-9A7E-EFCC6BD64A53}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DVOutilsSysteme", "..\DVOutilsSysteme\DVOutilsSysteme.csproj", "{2EFCDD65-F0D7-47A0-9AF8-05D137B8483E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DHTransportLC", "..\DHTransportLC\DHTransportLC\DHTransportLC.csproj", "{451919B0-3A4B-4C12-92D7-0EEE15671595}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B956E753-6A53-4CF8-9A7E-EFCC6BD64A53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B956E753-6A53-4CF8-9A7E-EFCC6BD64A53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B956E753-6A53-4CF8-9A7E-EFCC6BD64A53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B956E753-6A53-4CF8-9A7E-EFCC6BD64A53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EFCDD65-F0D7-47A0-9AF8-05D137B8483E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EFCDD65-F0D7-47A0-9AF8-05D137B8483E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EFCDD65-F0D7-47A0-9AF8-05D137B8483E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{451919B0-3A4B-4C12-92D7-0EEE15671595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{451919B0-3A4B-4C12-92D7-0EEE15671595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{451919B0-3A4B-4C12-92D7-0EEE15671595}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

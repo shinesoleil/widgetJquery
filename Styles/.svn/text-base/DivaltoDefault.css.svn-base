@@ -1,0 +1,50 @@
+﻿
+/*
+ca fout la merde avec les boites de dialogue ui (lors du changement de taille)
+*
+{
+	box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	-webkit-box-sizing:border-box; 
+}
+*/
+
+.cssdivalto
+{
+	font-size:11px;	
+}
+
+div ,button
+{
+	font-size:11px;	
+	
+}
+
+.policeDefaut
+{
+	font-size:11px;
+	font-family:Times New Roman;
+}
+
+.divaltoSaisie
+{
+	border-color:Highlight;
+	border-width:1px;
+	border-style:solid;
+	border-color:blue;
+}
+
+input
+{
+	background-color:#e9e9e9;
+}
+
+p
+{
+	white-space:nowrap;
+}
+
+.divalto-widget-content {
+    border: 1px solid #AAAAAA;
+    color: #222222;
+}

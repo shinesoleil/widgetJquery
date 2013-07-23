@@ -1,0 +1,208 @@
+﻿<html>
+
+<!--
+http://ajpiano.com/widgetfactory/#slide12
+http: //www.novius-labs.com/developper-plugin-jquery-introduction,18.html
+
+-->
+
+
+
+<head>
+	<link rel="stylesheet" type="text/css" media="screen" href="styles/ResetStyles.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="styles/DivaltoDefault.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="Scripts/jQuery/css/smoothness/jquery-ui-1.10.1.custom.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="Scripts/jqgrid/css/ui.jqgrid.css" />
+     	<link rel="stylesheet" type="text/css" media="screen" href="styles/divaltoWidgets/groupBox.css" />
+      	<link rel="stylesheet" type="text/css" media="screen" href="styles/divaltoWidgets/caseACocher.css" />
+      	<link rel="stylesheet" type="text/css" media="screen" href="styles/divaltoWidgets/grille.css" />
+
+	<script type="text/javascript" src="scripts/jquery/jquery-1.9.1.js"></script>
+	<script type="text/javascript" src="scripts/jquery/jquery-ui-1.10.1.custom.js"></script>
+	<script src="Scripts/localStorage/jquery.storage.js" type="text/javascript"></script>
+	<script src="Scripts/divaltoWidgets/groupBox.js" type="text/javascript"></script>
+	<script src="Scripts/divaltoWidgets/caseACocher.js" type="text/javascript"></script>
+	<script src="Scripts/divaltoWidgets/grille.js" type="text/javascript"></script>
+
+	<!-- Pour être certain que IE execute la bonne version du fichier. Penser a effacer le cache une fois qu'on active cette option
+	-->
+	<meta http-equiv="Pragma" content="no-cache">		
+
+</head>
+<body id="monbody">
+
+
+    <style>
+
+        /*.divaltoGroupBox-cadre
+        {
+            padding:0;
+        }
+
+       .divaltoGroupBox-titre
+        {
+            border: 1px solid #AAAAAA;
+            color: #ffffff;
+            font-weight: bold;
+            background:url();
+            text-align:center;
+            background-color:#bababa;
+        }
+
+        .divaltoGroupBox-actif
+        {
+            background-color:blueviolet !important;
+        }*/
+
+        .autreCoul
+        {
+            background-color:green;
+        }
+
+        .maCouleur
+        {
+            background-color:blue;
+        }
+
+        .icodivalto_1 {
+            background-image:url("images/majeur.bmp");
+            
+        }
+
+        .maPolice {
+            font-family:'Arial Rounded MT';
+            font-size:10px;
+        }
+
+        .divaltoTabs, .cssdivalto .divaltoTabs {
+            padding:0px;
+            border: 1px solid #AAAAAA;
+            color: #222222;
+        }
+
+
+/*
+        .divaltoCaseACocher
+        {
+            font-size:10px;
+            padding:10px;
+            display: table-cell;
+            vertical-align: middle;
+          	box-sizing:border-box;   helas ca ne marche pas avec table-cell et firefox 
+        	-moz-box-sizing:border-box;
+	        -webkit-box-sizing:border-box; 
+            overflow:hidden;
+        }
+*/
+     </style>
+
+<script>
+
+
+    /*
+    Je piege la fonction val de jquery
+    Lorsqu'elle est appelée pour modifier une valeur, j'appelle la fonction standard et ensuite je declenche changeval
+    */
+    (function ($) {
+        var originalVal = $.fn.val;
+        $.fn.val = function (value) {
+            if (typeof value != 'undefined') {
+                var ret = originalVal.call(this, value);
+                this.trigger("changeval");
+                return ret;
+            }
+            return originalVal.call(this);
+        };
+    })(jQuery);
+
+
+
+
+
+
+    var chaine = { 'modePourcent':true,'tailleX': 820 , 'tailleY':300 , 'cellules': [{ 'avecResize': 1, 'fond': null, 'posX': 0, 'posY': 0, 'tailleX': 360, 'tailleY': 600 }, { 'avecResize': 1, 'fond': null, 'posX': 360, 'posY': 0, 'tailleX': 100, 'tailleY': 600 }, { 'avecResize': 1, 'fond': null, 'posX': 460, 'posY': 0, 'tailleX': 360, 'tailleY': 600 }], 'nbCellules': 3, 'vertical': false };
+
+    var chaine1 = {'modePourcent':true,'tailleX': 100 , 'tailleY':300 , 'cellules': [{ 'avecResize': 1, 'fond': null, 'posX': 0, 'posY': 0, 'tailleX': 100, 'tailleY': 100 }, { 'avecResize': 1, 'fond': null, 'posX': 0, 'posY': 100, 'tailleX': 100, 'tailleY': 100 }, { 'avecResize': 1, 'fond': null, 'posX': 0, 'posY': 200, 'tailleX': 100, 'tailleY': 100 }], 'nbCellules': 3, 'vertical': true };
+
+    $(document).ready(function () {
+
+
+        //	    params = $.parseJSON(chaine);
+        params = chaine;
+
+        var $g = $("<div></div>").divaltoGrille(params);
+        $("#monbody").append($g);
+        $g.css("top", "50px");
+
+    //    $g.width("720px");
+    //    $g.height("900px");
+
+        $g.attr("id", "idgrille");
+
+        var $o = $("<div>je suis un div</div>");
+        $g.divaltoGrille("getCellule", 1).append($o);
+        $o = $("<div>je suis un div</div>");
+        $g.divaltoGrille("getCellule", 1).append($o);
+        $o = $("<div>je suis un div</div>");
+        $g.divaltoGrille("getCellule", 1).append($o);
+        $o = $("<div>je suis un div</div>");
+        $g.divaltoGrille("getCellule", 1).append($o);
+        $o = $("<div>je suis un div</div>");
+        $g.divaltoGrille("getCellule", 1).append($o);
+
+
+        var $gg = $("<div></div>").divaltoGrille(chaine1);
+
+       //$("#monbody").append($gg);
+        $g.divaltoGrille("getCellule", 2).append($gg);
+
+
+        $gg.css("position", "absolute");
+        $gg.css("top", "10px");
+        $gg.css("left", "10px");
+
+        $gg.width("220px");
+        $gg.height("200px");
+
+        $gg.attr("id", "idgrille1");
+
+
+
+        $o.on("resizeDivaltoGrille", function (event, params) {
+            //                alert("parent resize");
+        });
+
+
+        var $o = $("<div>je suis un autre div</div>");
+        $g.divaltoGrille("getCellule", 2).append($o);
+
+        $o.on("resizeDivaltoGrille", function (event, params) {
+            //              alert("parent resize");
+        });
+
+        $('<input id="Button1" type="button" value="button" />').appendTo("#monbody");
+
+        $("#Button1").on("click", function (event) {
+            $("#idgrille").width(400);
+        });
+
+
+    });
+
+
+
+</script>
+
+    
+
+    
+
+
+    
+
+    
+
+    </body>
+</html>
+
+

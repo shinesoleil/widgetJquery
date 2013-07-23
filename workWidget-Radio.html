@@ -1,0 +1,337 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/ResetStyles.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="styles/DivaltoDefault.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="Scripts/jQuery/css/smoothness/jquery-ui-1.10.1.custom.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="Scripts/jqgrid/css/ui.jqgrid.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/divaltoWidgets/onglet.css" />
+
+	<script type="text/javascript" src="scripts/jquery/jquery-1.9.1.js"></script>
+	<script type="text/javascript" src="scripts/jquery/jquery-ui-1.10.1.custom.js"></script>
+	<script src="Scripts/localStorage/jquery.storage.js" type="text/javascript"></script>
+	<script src="Scripts/divaltoWidgets/onglet.js" type="text/javascript"></script>
+
+	<!-- Pour être certain que IE execute la bonne version du fichier. Penser a effacer le cache une fois qu'on active cette option
+	-->
+	<meta http-equiv="Pragma" content="no-cache">		
+
+</head>
+<body>
+    <script>
+        /*
+Je piege la fonction val de jquery
+Lorsqu'elle est appelée pour modifier une valeur, j'appelle la fonction standard et ensuite je declenche changeval
+*/
+        (function ($) {
+            var originalVal = $.fn.val;
+            $.fn.val = function (value) {
+                if (typeof value != 'undefined') {
+                    var ret = originalVal.call(this, value);
+                    this.trigger("changeval");
+                    return ret;
+                }
+                return originalVal.call(this);
+            };
+        })(jQuery);
+
+
+
+        // A FINALISER
+        // multi ligne : pour l'instant il se met toujours en multi ligne
+        // ascenseur si debordement : non règlé pour l'instant
+        // bitmap
+
+        $.widget("divalto.divaltoGroupeRadio", {
+
+            // options par défaut du widget 
+            // modifiables à la construction 
+            // mais aussi après la construction du widget 
+            options: {
+                titre: "",
+                listeBoutons: "",
+                valeurCourante: "-1",
+                valeurInitiale:"0"
+            },
+
+            boutons : "",
+
+            // La fonction _create est appelé à la construction du widget
+            // la variable d'instance this.element contient un objet jQuery
+            // contenant l'élément sur lequel porte le widget
+            // la variable options contient la fusion des options passées en parametres et des options par défaut
+            _create: function () {
+
+                var $self = this;                                       // $ self est l'objet jqueryUI
+                //$self.boutons = new Array();
+                
+                $self.element.css("border","2px solid red"); 
+                $self._tagTitre = $("<div style='top: 0px; left: 0px; position: absolute;font-size:inherit'>&nbsp;</div>");
+                $self._tagTitre.append("<div style='background-color: white; top: -70%; font-size: inherit; position: absolute;'>&nbsp&nbsp" + $self.options.titre + "&nbsp&nbsp</div>");
+
+
+                $self.element.append($self._tagTitre);
+
+                //<div style="top: 0px; left: 0px; font-size: 20px; position: absolute;">
+                //    <div style="background-color: white; top: -70%; font-size: inherit; position: absolute;">
+                //        &nbsp;&nbsp;pays&nbsp;&nbsp;</div>
+                //&nbsp;</div>
+
+
+                for (var i = 0; i < $self.options.listeBoutons.length; i++)
+                {                
+                    var $BT = $("<div></div>");
+                    var $cadreInterieur = $("<div></div>");
+                    var $img = $("<img></img>");
+                    var $texte = $("<span></span>");
+
+                    //if (i == $self.options.valeurCourante) {
+                    //    $img.attr("src", "images/radio1.png");
+                    //}
+                    //else {
+                        $img.attr("src", "images/radio0.png");
+                   // }
+
+                    $texte.append($self.options.listeBoutons[i].texte);
+                    $img.attr("data-numeroBouton", i.toString());
+                    $img.css("float", "right").css("padding-right","10px");
+                    
+                    
+                    //$cadreInterieur.css("position","absolute").css("width","calc(100% - 20px)").css("display", "table-cell");
+                    if($self.options.listeBoutons[i].texteAGauche==true)
+                        $cadreInterieur.append($img).append($texte);
+                    else
+                        $cadreInterieur.append($texte).append($img);
+
+                    $BT.append($cadreInterieur);
+                    $BT.css("position", "absolute").css("left", $self.options.listeBoutons[i].positionX.toString() + "px")
+                       .css("top", $self.options.listeBoutons[i].positionY.toString() + "px").width($self.options.listeBoutons[i].tailleX)
+                       .height($self.options.listeBoutons[i].tailleY);
+                    $BT.attr("data-type", "radiobouton");
+                    $self.element.append($BT);
+
+
+
+                    $img.on("click", { "item": this, "groupe": $self, "numero": i }, function (event) {
+                        event.data.groupe.element.trigger("clicquerLeRadioBoutonDivalto",event.data.numero);
+                    });
+
+                    this.element.on("changeval",this,function(event) {
+                        var self =event.data;
+                        var valeur=self.element.val();
+                        if(typeof(valeur) !="undefined")
+                            valeur=parseInt(valeur);
+                        if(typeof(valeur) =="undefined"||valeur !=self.options.valeurCourante) {
+                            self.changerLaValeur(valeur);
+                            }
+                    });
+                            
+                    this.element.val(this.options.valeurInitiale);
+
+                    //$img.on("click", { "item": this, "groupe": $self, "numero": i }, function (event) {
+                    //    var n = event.data.numero;
+                    //    var boutons = event.data.groupe.element.find("[data-type=radiobouton]");
+                    //    $(boutons[n]).find("img").attr("src", "images/radio1.png");
+                    //    $(boutons[event.data.groupe.options.valeurCourante]).find("img").attr("src", "images/radio0.png");
+                    //    event.data.groupe.options.valeurCourante = event.data.numero;
+                    //});
+
+                    //$img.on("click", { "item": this, "groupe": $self, "numero": i }, function (event) {
+                    //    var n = event.data.numero;
+                    //    var boutonClique = "[data-numeroBouton=" + n.toString() + "]";
+                    //    var boutonReste = "[data-numeroBouton="+event.data.groupe.options.valeurCourante.toString()+"]";
+                    //    var findDiv = event.data.groupe.element.find(boutonClique);
+                    //    var otherDiv = event.data.groupe.element.find(boutonReste);
+                    //    findDiv.attr("src", "images/radio1.png");
+                    //    otherDiv.attr("src", "images/radio0.png");
+                    //    event.data.groupe.options.valeurCourante = event.data.numero;
+                    //});
+
+
+
+                    //$img.on("click", { "item": this, "groupe": $self, "numero": i }, function (event) {
+                    //    var n = event.data.numero;
+                    //    var findDiv = event.data.groupe.element.find("div:eq(" + (n+1).toString() + ") img");
+                    //    var otherDiv = event.data.groupe.element.find("div:eq(" + (event.data.groupe.options.valeurCourante+1).toString() + ") img");
+                    //    findDiv.attr("src", "images/radio1.png");
+                    //    otherDiv.attr("src", "images/radio0.png");
+                    //    event.data.groupe.options.valeurCourante = event.data.numero;
+                    //});
+
+
+
+                    ////$self.boutons.push($BT);
+                    ////méthode 1
+                    //$img.on("click", { "item": this, "groupe": $self, "numero":i}, function (event) {
+                    //    var n = event.data.numero;
+                    //    var findDiv = event.data.groupe.element.find("div img");
+                    //    $(findDiv[n]).attr("src", "images/radio1.png");
+                    //    $(findDiv[event.data.groupe.options.valeurCourante]).attr("src", "images/radio0.png");
+                    //    event.data.groupe.options.valeurCourante = n;
+                    //});
+
+                    //méthode 2
+                    //$img.on("click", { "item": this, "groupe": $self, "numero": i }, function (event) {
+                    //    var n = event.data.numero;
+                    //    var nouveauBouton = event.data.groupe.boutons[n];
+                    //    var ancienBouton = event.data.groupe.boutons[event.data.groupe.options.valeurCourante];
+                    //    var imageNouveauBouton = nouveauBouton.find("img");
+                    //    imageNouveauBouton.attr("src", "images/radio1.png");
+                    //    var imageAncienBouton = ancienBouton.find("img");
+                    //    imageAncienBouton.attr("src", "images/radio0.png");
+                    //    event.data.groupe.options.valeurCourante = n;
+                    //});
+
+                }
+
+               
+
+                //$self.element.addClass("ui-tabs ui-widget ui-corner-all divaltoTabs cssdivalto");
+
+                //var $ul = $("<ul></ul>");
+                //$ul.addClass("ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all cssdivalto");
+                //$ul.attr("role", "tablist");
+
+                //if ($self.options.police != "") {
+                //    $self.element.addClass($self.options.police);
+                //}
+
+                //// - boucle sur les items
+                //$.each($self.options.items, function () {
+                //    var $item = $("<li class='ui-state-default ui-corner-top' tabindex='0'></li>");
+                //    var $lien = $('<a class="ui-tabs-anchor" tabindex="-1"></a>');
+                //    $lien.append(this.texte);
+
+                //    // image
+                //    if (this.bitmap != null) {
+                //        $img = $('<img src="images/majeur.bmp"/>');     //!!!!!!!!!!!!!!!!!! a finaliser
+                //        $img.css("padding", "2px");
+                //        $img.width($self.options.largeurImage);
+                //        $img.height($self.options.hauteurImage);
+                //        $lien.prepend($img);
+                //    }
+
+                //    // bulle
+                //    if (this.bulle != null && this.bulle != "") {
+                //        $item.attr("title", this.bulle);
+                //        if (typeof ($item.attr("data-divaltoInfoBulle")) != "undefined")
+                //            $item.tooltip("destroy");
+                //        $item.tooltip();
+                //        $item.attr("data-divaltoInfoBulle", this.bulle);
+                //    }
+
+                //    // traitement pour le courant
+                //    if ($self.options.pageCourante == this.numeroPage) {
+                //        $item.addClass("ui-tabs-active ui-state-active");
+                //        if (this.fond != null && this.fond != "")
+                //            $self.element.addClass(this.fond);
+
+                //    }
+
+                //    $item.attr("data-pageonglet", this.numeroPage.toString());
+
+                //    // l'élément de la liste contient l'item qui contient le lien
+                //    $item.append($lien);
+                //    $ul.append($item);
+                //    $lien.css("cursor", "default");
+
+
+                //    if (this.visibilite == 1) {                         // grisé
+                //        $item.css("opacity", "0.5");
+                //    }
+                //    else if (this.visibilite != 0) {
+                //        $item.css("display", "none");
+                //    }
+
+
+                //    // evenement clic
+                //    $item.on("click", { "item": this, "onglet": $self }, function (event) {
+                //        var self = event.data;      // self est de la classe item+onglet
+
+                //        var onglet = self.onglet;
+                //        var item = self.item;
+
+                //        event.preventDefault();
+                //        event.stopPropagation();
+
+                //        // numero arret + nouvelle page + ancienne page
+                //        // alert("clic itempage=" + item.numeroPage.toString() + " idgroupe=" + onglet.element.attr("id"));
+                //        if (onglet.options.pageCourante == item.numeroPage) {
+                //            return;
+                //        }
+                //        if (item.visibilite != 0)
+                //            return;
+
+                //        onglet.element.trigger("clickOnglet", {
+                //            "idOnglet": onglet.element.attr("id"),
+                //            "pageOngletClick": item.numeroPage,
+                //            "anciennePage": onglet.options.pageCourante,
+                //            "arretOnglet": onglet.options.pointArret
+                //        });
+                //    });
+                //});
+                //$self.element.append($ul);
+            },
+
+            changerLaValeur : function (i)
+            {
+                var images = this.element.find("img");
+                $(images[i]).attr("src", "images/radio1.png");
+                $(images[this.options.valeurCourante]).attr("src", "images/radio0.png");
+                this.options.valeurCourante = i;
+            },
+
+
+            _setOption: function (key, value) {
+                // Surcharge de méthode, appelée a chaque changement d'option
+                // ne pas oublier d'appelr la fonction standard sinon plus rien ne marche
+                // Use the _setOption method to respond to changes to options
+                switch (key) {
+                }
+                // and call the parent function too! Ca positionne l'option
+                return this._superApply(arguments);
+            }
+        });
+
+
+
+
+
+        var chaine = '{"hauteurImage":16,"items":[{"bitmap":1,"bulle":"bubull","fond":null,"numeroPage":13,"texte":"premier","visibilite":0},{"bitmap":1,"bulle":"bubull","fond":null,"numeroPage":13,"texte":"premier","visibilite":0},{"bitmap":1,"bulle":"bubull","fond":null,"numeroPage":13,"texte":"premier","visibilite":0},{"bitmap":1,"bulle":"bubull","fond":null,"numeroPage":13,"texte":"premier","visibilite":0},{"bitmap":1,"bulle":"bubull","fond":null,"numeroPage":13,"texte":"premier","visibilite":0},{"bitmap":1,"bulle":"bubull","fond":null,"numeroPage":13,"texte":"premier","visibilite":0},{"bitmap":null,"bulle":"nulle","fond":null,"numeroPage":14,"fond":"maCouleur","texte":"second","visibilite":0}],"largeurImage":16,"multiLigne":false,"padding":"padd_6","pointArret":0,"police":"pol_10","pageCourante":14}';
+        var bouton1 = { "texte": "chine", "texteAGauche": false, "positionX": 1, "positionY": 1, "tailleX": 100, "tailleY": 20 };
+        var bouton2 = { "texte": "France", "texteAGauche": false, "positionX": 1, "positionY": 31, "tailleX": 100, "tailleY": 20 };
+        var groupe = { "titre": "pays", "valeurInitiale": 0, "listeBoutons": [bouton1, bouton2] };
+
+        var bouton3 = { "texte": "Strasbourg", "texteAGauche": true, "positionX": 1, "positionY": 1, "tailleX": 20, "tailleY": 20 };
+        var bouton4 = { "texte": "Paris", "texteAGauche": true, "positionX": 1, "positionY": 31, "tailleX": 20, "tailleY": 20 };
+        var groupe2 = { "titre": "ville", "valeurInitiale": 0, "listeBoutons": [bouton3, bouton4] };
+        $(document).ready(function () {
+            var $o1 = $("<div></div>").divaltoGroupeRadio(groupe);
+            var $o2 = $("<div></div>").divaltoGroupeRadio(groupe2);
+        
+            $("body").append($o1);
+            $("body").append($o2);
+
+            $o1.width(100).height(200);
+            $o1.css("position", "absolute").css("top", 100).css("left", 150);
+
+
+
+            $("body").on("clicquerLeRadioBoutonDivalto", function (event,numero) {
+                //  $(event.target).divaltoGroupeRadio("changerLaValeur", numero);
+
+               // alert($(event.target).val());
+                $(event.target).val(numero);
+                $o1.css("font-size", "20px");
+            });
+           
+        });
+
+
+
+
+        </script>
+</body>
+</html>

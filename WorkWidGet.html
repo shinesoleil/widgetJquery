@@ -1,0 +1,374 @@
+﻿<html>
+
+<!--
+http://ajpiano.com/widgetfactory/#slide12
+http: //www.novius-labs.com/developper-plugin-jquery-introduction,18.html
+
+-->
+
+
+
+<head>
+	<link rel="stylesheet" type="text/css" media="screen" href="styles/ResetStyles.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="styles/DivaltoDefault.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="Scripts/jQuery/css/smoothness/jquery-ui-1.10.1.custom.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="Scripts/jqgrid/css/ui.jqgrid.css" />
+      	<link rel="stylesheet" type="text/css" media="screen" href="styles/divaltoWidgets/groupBox.css" />
+      	<link rel="stylesheet" type="text/css" media="screen" href="styles/divaltoWidgets/caseACocher.css" />
+
+	<script type="text/javascript" src="scripts/jquery/jquery-1.9.1.js"></script>
+	<script type="text/javascript" src="scripts/jquery/jquery-ui-1.10.1.custom.js"></script>
+	<script src="Scripts/localStorage/jquery.storage.js" type="text/javascript"></script>
+	<script src="Scripts/divaltoWidgets/groupBox.js" type="text/javascript"></script>
+	<script src="Scripts/divaltoWidgets/caseACocher.js" type="text/javascript"></script>
+
+	<!-- Pour être certain que IE execute la bonne version du fichier. Penser a effacer le cache une fois qu'on active cette option
+	-->
+	<meta http-equiv="Pragma" content="no-cache">		
+
+</head>
+<body id="monbody">
+
+
+    <style>
+
+        /*.divaltoGroupBox-cadre
+        {
+            padding:0;
+        }
+
+       .divaltoGroupBox-titre
+        {
+            border: 1px solid #AAAAAA;
+            color: #ffffff;
+            font-weight: bold;
+            background:url();
+            text-align:center;
+            background-color:#bababa;
+        }
+
+        .divaltoGroupBox-actif
+        {
+            background-color:blueviolet !important;
+        }*/
+
+        .autreCoul
+        {
+            background-color:green;
+        }
+
+        .maCouleur
+        {
+            background-color:blue;
+        }
+
+        .icodivalto_1 {
+            background-image:url("images/majeur.bmp");
+            
+        }
+
+        .maPolice {
+            font-family:'Arial Rounded MT';
+            font-size:10px;
+        }
+
+        .divaltoTabs, .cssdivalto .divaltoTabs {
+            padding:0px;
+            border: 1px solid #AAAAAA;
+            color: #222222;
+        }
+
+        .divalto-resizable-helper-e {
+            border-right:solid 2px;
+        }
+        .divalto-resizable-helper-s {
+            border-bottom:solid 2px;
+        }
+
+/*
+        .divaltoCaseACocher
+        {
+            font-size:10px;
+            padding:10px;
+            display: table-cell;
+            vertical-align: middle;
+          	box-sizing:border-box;   helas ca ne marche pas avec table-cell et firefox 
+        	-moz-box-sizing:border-box;
+	        -webkit-box-sizing:border-box; 
+            overflow:hidden;
+        }
+*/
+     </style>
+
+<script>
+
+
+    /*
+    Je piege la fonction val de jquery
+    Lorsqu'elle est appelée pour modifier une valeur, j'appelle la fonction standard et ensuite je declenche changeval
+    */
+    (function ($) {
+        var originalVal = $.fn.val;
+        $.fn.val = function (value) {
+            if (typeof value != 'undefined') {
+                var ret = originalVal.call(this,value);
+                this.trigger("changeval");
+                return ret;
+            }
+            return originalVal.call(this);
+        };
+    })(jQuery);
+
+
+    // une grille est composée de cellules
+    // une cellule a un fils qui est son contenu
+    //             a un fils qui est sa rebarre
+    // J'ai mis 2 fils car sinon la rebarre fait apparaitre les ascenseurs a cause de "overflow"
+    // La gestion du contenu est simple vu qu'il hérite de la cellule.
+    // la fonction getCellule retourne l'objet contenu
+    // On génére l'evenement "resizeDivaltoGrille" pour les objets contenus dans les cellules, c'est à dire les panels page
+    // A finaliser : la gestion des triggers. Voir exactement ce que l'on fait
+    $.widget("divalto.divaltoGrille", {
+
+        // options par défaut du widget 
+        // modifiables à la construction 
+        // mais aussi après la construction du widget 
+        options: {
+            vertical:true,
+            nbcellules:0,
+            cellules: null  // tableau d'objets { 'avecResize': 1, 'posX': 0, 'posY': 50, 'tailleX': 360, 'tailleY': 100 }
+        },
+
+        _$cellules: new Array,      // tableau des cellules jquery { conteneur , contenu }
+
+        // La fonction _create est appelé à la construction du widget
+        // la variable d'instance this.element contient un objet jQuery
+        // contenant l'élément sur lequel porte le widget
+        // la variable options contient la fusion des options passées en parametres et des options par défaut
+        _create: function () {
+            var $self = this;
+
+            $self.element.css("position", "absolute");
+            $self.element.css("top", "0px");
+            $self.element.css("left", "0px");
+
+            // - creation des cellules
+            //   une cellule est composée de deux tag div imbriqués
+            //          - le conteneur
+            //          - le contenu
+            //   Dans mon tableau je garde un pointeur sur les 2
+            $.each($self.options.cellules, function (i) {
+                var cell = this;
+                var $cell = $("<div></div>");
+
+                $cell.css("position", "absolute");
+                $cell.css("top" , cell.posY + "px").css("left", cell.posX + "px");// relatif au parent
+                $cell.width(cell.tailleX).height(cell.tailleY);
+
+                var $contenu = $("<div></div>");
+                $contenu.css("overflow", "auto").css("width","inherit").css("height","inherit");
+                $cell.append($contenu);
+
+                if (cell.avecResize && i + 1 < $self.options.cellules.length) {
+                    if ($self.options.vertical)
+                        $cell.resizable({ handles: 'e', helper: "divalto-resizable-helper-e", ghost: "true" });
+                    else
+                        $cell.resizable({ handles: 's', helper: "divalto-resizable-helper-s" , ghost:"true" });
+                }
+
+                if (i % 2)
+                    $cell.css("background-color", "blue")
+                else
+                    $cell.css("background-color", "red")
+
+                $self.element.append($cell);
+
+                $self._$cellules.push({ "conteneur": $cell, "contenu": $contenu });
+
+
+
+                // Debut de resize, je limite le déplacement à -20 du suivant
+                //
+                // j'ai essayé dans cette fonction d'utiliser $cell i etc... et ca marche !
+                // ca ne me semble pas prudent, je préfère la méthode sûre ci-dessous
+                //
+                // event.data recoit l'objet passé en deuxieme argument
+                $cell.on("resizestart", { "indice": i, "grille": $self }, function (event) {
+                    var $grille  = event.data.grille;
+                    var indice   = event.data.indice;
+                    var cellcour = $grille._$cellules[indice].conteneur;
+                    var cellsuiv = $grille._$cellules[indice + 1].conteneur;
+
+                    if ($grille.options.vertical) {
+                        var old = cellcour.width();
+                        var suiv = cellsuiv.width();
+                        var nouv = old + suiv - 20;
+                        cellcour.resizable("option", "maxWidth", nouv);
+                    }
+                    else{ 
+                        var old = cellcour.height();
+                        var suiv = cellsuiv.height();
+                        var nouv = old + suiv - 20;
+                        cellcour.resizable("option", "maxHeight", nouv);
+                    }
+                });
+
+
+                // Fin de resize
+                // Je met a jour la cellule a droite
+                $cell.on("resizestop", { "indice": i, "grille": $self }, function (event, ui) {
+                    var indice = event.data.indice;
+                    var $grille = event.data.grille;
+                    var cellcour = $grille._$cellules[indice].conteneur;
+                    var cellsuiv = $grille._$cellules[indice + 1].conteneur;
+                    var diff = 0;
+                    var tailleOrgSuivante = { 
+                        "width":$grille.options.cellules[indice + 1].tailleX,
+                        "height":$grille.options.cellules[indice + 1].tailleY };
+
+                    if ($grille.options.vertical) {
+                        //  if (ui.size.width > ui.originalSize.width) {        // agrandissement
+                        // pas besoin, ca marche avec des négatifs
+                        diff = ui.size.width - ui.originalSize.width;
+
+                        // maj de la taille de la suivante
+                        $grille.options.cellules[indice + 1].tailleX -= diff;
+                        cellsuiv.width($grille.options.cellules[indice + 1].tailleX);
+
+                        // maj de la position de la suivante
+                        $grille.options.cellules[indice + 1].posX += diff;
+                        cellsuiv.css("left", $grille.options.cellules[indice + 1].posX.toString() + "px");
+
+                        //maj de ma taille
+                        $grille.options.cellules[indice].tailleX = ui.size.width;
+
+                        cellcour.height($grille.options.cellules[indice].tailleY);// sinon ca diminue de 1. C'est un bug http://bugs.jqueryui.com/ticket/8044
+
+                    }
+                    else {
+                        diff = ui.size.height - ui.originalSize.height;
+
+                        // maj de la taille de la suivante
+                        $grille.options.cellules[indice + 1].tailleY -= diff;
+                        cellsuiv.height($grille.options.cellules[indice + 1].tailleY);
+
+                        // maj de la position de la suivante
+                        $grille.options.cellules[indice + 1].posY += diff;
+                        cellsuiv.css("top", $grille.options.cellules[indice + 1].posY.toString() + "px");
+
+                        //maj de ma taille
+                        $grille.options.cellules[indice].tailleY = ui.size.height;
+
+                        cellcour.width($grille.options.cellules[indice].tailleX);// sinon ca diminue de 1. C'est un bug http://bugs.jqueryui.com/ticket/8044
+
+                    }
+
+                    // envoyer a tous les enfants pour dire que leur parent a changé
+                    // pour la cellule courante :
+                    //      - ancienne taille, nouvelle taille
+                    // pour la cellule de droite
+                    //      - ancienne taille, nouvelle taille
+                    $grille._$cellules[indice].contenu.children("*").trigger("resizeDivaltoGrille", {
+                        "originalSize": ui.originalSize,
+                        "size": ui.size
+                    });
+
+                    var tailleSuivante = {
+                        "width": $grille.options.cellules[indice + 1].tailleX,
+                        "height": $grille.options.cellules[indice + 1].tailleY
+                    };
+
+                    $grille._$cellules[indice + 1].contenu.children("*").trigger("resizeDivaltoGrille", {
+                        "originalSize": tailleOrgSuivante,
+                        "size": tailleSuivante
+                    });
+                });
+            });
+        },
+
+        // fonction qui retourne le contenu de la cellule
+        getCellule : function (i) {
+            return this._$cellules[i].contenu; //    .children(":first");
+        },
+
+        _setOption: function (key, value) {
+            // Surcharge de méthode, appelée a chaque changement d'option
+            // ne pas oublier d'appelr la fonction standard sinon plus rien ne marche
+            // Use the _setOption method to respond to changes to options
+            switch (key) {
+            }
+            // and call the parent function too! Ca positionne l'option
+            return this._superApply(arguments);
+        },
+
+
+    });
+
+
+    var mauvais = "{'idPage':'M1P17L21C0_1','idMere':'M1P21L1C1_1','idGrille':'0_M1P21L1C1_1','iCellule':0}";
+                   
+    var pp = { 'idPage': 'M1P17L21C0_1', 'idMere': 'M1P21L1C1_1', 'idGrille': '0_M1P21L1C1_1', 'iCellule': 0 };
+    
+    var bon = JSON.stringify(pp);
+
+    var jj = $.parseJSON(mauvais);
+
+
+
+
+
+    var chaine = { 'cellules': [{ 'avecResize': 1, 'fond': null, 'posX': 0, 'posY': 50, 'tailleX': 360, 'tailleY': 100 }, { 'avecResize': 1, 'fond': null, 'posX': 360, 'posY': 50, 'tailleX': 100, 'tailleY': 100 }, { 'avecResize': 1, 'fond': null, 'posX': 460, 'posY': 50, 'tailleX': 360, 'tailleY': 100 }], 'nbCellules': 3, 'vertical': true };
+    $(document).ready(function () {
+
+
+        //	    params = $.parseJSON(chaine);
+        params = chaine;
+
+    	    var $g = $("<div></div>").divaltoGrille(params);
+    	    $("#monbody").append($g);
+
+    	    $g.width("720px");
+    	    $g.height("900px");
+
+    	    $g.attr("id", "idgrille");
+
+    	    var $o = $("<div>je suis un div</div>");
+    	    $g.divaltoGrille("getCellule", 1).append($o);
+    	    $o = $("<div>je suis un div</div>");
+    	    $g.divaltoGrille("getCellule", 1).append($o);
+    	    $o = $("<div>je suis un div</div>");
+    	    $g.divaltoGrille("getCellule", 1).append($o);
+    	    $o = $("<div>je suis un div</div>");
+    	    $g.divaltoGrille("getCellule", 1).append($o);
+    	    $o = $("<div>je suis un div</div>");
+    	    $g.divaltoGrille("getCellule", 1).append($o);
+
+            $o.on("resizeDivaltoGrille", function (event,params) {
+//                alert("parent resize");
+            });
+            
+
+            var $o = $("<div>je suis un autre div</div>");
+            $g.divaltoGrille("getCellule", 2).append($o);
+
+            $o.on("resizeDivaltoGrille", function (event, params) {
+  //              alert("parent resize");
+            });
+
+
+
+
+    	});
+
+
+
+</script>
+
+    
+
+    
+
+    </body>
+</html>
+
+

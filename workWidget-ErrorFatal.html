@@ -1,0 +1,246 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/ResetStyles.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/DivaltoDefault.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="Scripts/jQuery/css/smoothness/jquery-ui-1.10.1.custom.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="Scripts/jqgrid/css/ui.jqgrid.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/divaltoWidgets/onglet.css" />
+
+    <script type="text/javascript" src="scripts/jquery/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="scripts/jquery/jquery-ui-1.10.1.custom.js"></script>
+    <script src="Scripts/localStorage/jquery.storage.js" type="text/javascript"></script>
+    <script src="Scripts/divaltoWidgets/onglet.js" type="text/javascript"></script>
+
+    <!-- Pour être certain que IE execute la bonne version du fichier. Penser a effacer le cache une fois qu'on active cette option
+	-->
+    <meta http-equiv="Pragma" content="no-cache" />
+
+</head>
+<body>
+
+    <style>
+        #cadre {
+            border: 0.5px solid grey;
+        }
+
+        #icone {
+            width: 30px;
+            float: left;
+        }
+
+        #texteErreur {
+            color: skyblue;
+            font-size: 15px;
+            white-space: nowrap;
+            position: relative;
+            top: 3px;
+            left: 20px;
+            margin-right: 10px;
+            white-space: normal;
+        }
+
+        table {
+            position: relative;
+            left: 10px;
+            top: 15px;
+        }
+
+        .colonne1DeTable {
+            text-align: right;
+            font-size: x-small;
+        }
+
+        .colonne2DeTable {
+            padding-bottom: 3px;
+            padding-left: 25px;
+            text-align: left;
+            font-size: x-small;
+        }
+
+        .carre {
+            border: 0.5px solid grey;
+            float: right;
+            position: relative;
+            top: 28px;
+            font-size: xx-small;
+            margin-right: 5px;
+            padding: 0 4px;
+            text-align: center;
+        }
+
+        #espaceBouton {
+            background: none repeat scroll 0 0 #F0F0F0;
+            bottom: 70px;
+            height: 40px;
+            left: 0;
+            position: absolute;
+            width: 100%;
+        }
+
+        #details {
+            left: 10px;
+            position: relative;
+            top: 8px;
+            width: 29px;
+        }
+
+        #texteDetails {
+            left: 38px;
+            position: absolute;
+            top: 13px;
+        }
+
+        #fermer {
+            position: absolute;
+            right: 17px;
+            top: 9px;
+        }
+
+        #pile {
+            background: none repeat scroll 0 0 red;
+            bottom: 0;
+            height: 70px;
+            left: 0;
+            overflow: auto;
+            position: absolute;
+            width: 100%;
+            display:none;
+        }
+    </style>
+
+
+    <script>
+        $.widget("divalto.divaltoErrorFatal", {
+
+            options: {
+                titre: "Divalto",
+                texte: "Nom du fichier incorrect",//
+                prog: "Test.dhop",//
+                module: "Ysystem.dhop",//
+                date: "26/02/2013",//
+                adresse: "0x0095568",//
+                code: "0x0013", // pas sur
+                codesys: "---",
+                codecompljour: "2",
+                lieujour: "---"
+            },
+
+            etatPile:"hidden",
+
+            _create: function () {
+
+                var cadre = $("<div id='cadre'></div>");
+
+
+                var icone = $("<img id='icone'></img>");
+                icone.attr("src", "images/ICONERROR.png");     //images/" + nomIcon + ".png"
+                icone.appendTo(cadre);
+
+                var texteErreur = $("<p id='texteErreur'></p>");
+                texteErreur.html(this.options.texte);
+                texteErreur.appendTo(cadre);
+
+                //espace du tableau
+                var table = $("<table></table>");
+                table.appendTo(cadre);
+                //ligne de "programme"
+                var ligneProgramme = $("<tr id='programme'></tr>");
+                var colonneNomProgramme = $("<td class='colonne1DeTable'>Programme</td>");
+                var colonneContenuProgramme = $("<td class='colonne2DeTable'></td>");
+                colonneNomProgramme.appendTo(ligneProgramme);
+                colonneContenuProgramme.html(this.options.prog).appendTo(ligneProgramme);
+                ligneProgramme.appendTo(table);
+                //ligne de "module"
+                var ligneModule = $("<tr id='module'></tr>");
+                var colonneNomModule = $("<td class='colonne1DeTable'>Module</td>");
+                var colonneContenuModule = $("<td class='colonne2DeTable'></td>");
+                colonneNomModule.appendTo(ligneModule);
+                colonneContenuModule.html(this.options.module).appendTo(ligneModule);
+                ligneModule.appendTo(table);
+                //ligne de "date"
+                var ligneDate = $("<tr id='date'></tr>");
+                var colonneNomDate = $("<td class='colonne1DeTable'>Date</td>");
+                var colonneContenuDate = $("<td class='colonne2DeTable'></td>");
+                colonneNomDate.appendTo(ligneDate);
+                colonneContenuDate.html(this.options.module).appendTo(ligneDate);
+                ligneDate.appendTo(table);
+
+                //espace des carrés
+                var adresse = $("<div class='carre'><BR>Adresse<BR><BR>" + this.options.adresse + "<BR><BR></div>");
+                adresse.appendTo(cadre);
+                var lieu = $("<div class='carre'><BR>Lieu<BR><BR>" + this.options.lieujour + "<BR><BR></div>");
+                lieu.appendTo(cadre);
+                var codeComplementaire = $("<div class='carre'><BR>Code complementaire<BR><BR>" + this.options.codecompljour + "<BR><BR></div>");
+                codeComplementaire.appendTo(cadre);
+                var codeSysteme = $("<div class='carre'><BR>Code système<BR><BR>" + this.options.codesys + "<BR><BR></div>");
+                codeSysteme.appendTo(cadre);
+                var erreur = $("<div class='carre'><BR>Erreur<BR><BR>" + this.options.code + "<BR><BR></div>");
+                erreur.appendTo(cadre);
+
+                //espace des boutons
+                var espaceBouton = $("<div  id='espaceBouton'></div>");
+                var boutonDetail = $("<img id='details' src='images/toggle-down.png'></img>");
+                boutonDetail.appendTo(espaceBouton);
+                var texteDetail = $("<p id='texteDetails'>Details</p>");
+                texteDetail.appendTo(espaceBouton);
+                var boutonFermer = $("<button id='fermer'>Fermer</button>");
+                boutonFermer.button();
+                boutonFermer.appendTo(espaceBouton);
+                espaceBouton.appendTo(cadre);
+
+                //espace du pile
+
+                var pile = $("<div id='pile'>le contenu du pile</div>");
+                pile.appendTo(cadre);
+
+
+                this.element.append(cadre);
+
+                cadre.dialog({ title: this.options.titre, width: 404, height: 290, minWidth: 404, minHeight: 280 });
+                //changement de la partie "titre" en haut et le bouton "quitter" 
+                $("*.ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-icon-only.ui-dialog-titlebar-close").css("height", "12px").css("width", "38px").css("top", "5.5px");
+                $("*.ui-dialog-titlebar").css("background", "transparent").css("border", "none");
+
+                //$("#details").on("click", this, function (event) {
+                //    if (event.data.etatPile == "hidden") {
+                //        cadre.find("div#pile").show();
+                //        event.data.etatPile = "show";
+                //    }
+                //    else {
+                //        cadre.find("div#pile").slideUp();
+                //        event.data.etatPile = "hidden";
+                //    }
+                //});
+
+                cadre.find("img#details").on("click", this, function (event) {
+                    if (event.data.etatPile == "hidden") {
+cadre.find("div#pile").slideUp("slow");
+                        event.data.etatPile = "showed";
+
+                    }
+                    else {
+                        
+cadre.find("div#pile").slideDown("slow");
+                        event.data.etatPile = "hidden";
+                    }
+                })
+            }
+
+
+            
+
+
+        });
+
+
+        $(function () {
+            $("body").divaltoErrorFatal();
+
+        });
+
+    </script>
+</body>
+</html>
