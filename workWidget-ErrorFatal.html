@@ -20,60 +20,74 @@
 
 </head>
 <body>
-
+    //!!!!!!!!!!!!!!!!!!!!!!! nom des styles
     <style>
         #cadre {
-            border: 0.5px solid grey;
+            border: 1px solid grey;
         }
 
         #icone {
             width: 30px;
             float: left;
+            position: relative;
+            top: 10px;
         }
 
         #texteErreur {
             color: skyblue;
-            font-size: 15px;
+            font-size: large;
             white-space: nowrap;
             position: relative;
-            top: 3px;
-            left: 20px;
+            top: 10px;
+            left: 10px;
             margin-right: 10px;
             white-space: normal;
         }
 
-        table {
+        #table {
+            display: table;
             position: relative;
-            left: 10px;
-            top: 15px;
+            top: 20px;
         }
 
-        .colonne1DeTable {
+        .ligne {
+            display: table-row;
+        }
+        //!!!!!!!!!!!!!!!!!!!!!
+        .colonne1 {
+            display: table-cell;
+            font-family: arial;
+            font-size: 13px;
+            padding-left: 15px;
+            padding-top: 10px;
             text-align: right;
-            font-size: x-small;
+            width: 50px;
         }
 
-        .colonne2DeTable {
-            padding-bottom: 3px;
-            padding-left: 25px;
+        .colonne2 {
+            display: table-cell;
+            font-family: arial;
+            font-size: 13px;
+            width: 250px;
             text-align: left;
-            font-size: x-small;
+            padding-left: 25px;
         }
 
         .carre {
-            border: 0.5px solid grey;
+            border: 1px solid #AAE8FF;
             float: right;
             position: relative;
-            top: 28px;
-            font-size: xx-small;
-            margin-right: 5px;
-            padding: 0 4px;
+            top: 45px;
+            font-family: Arial;
+            font-size: 12px;
+            margin-right: 6px;
+            padding: 0 8px;
             text-align: center;
         }
 
         #espaceBouton {
             background: none repeat scroll 0 0 #F0F0F0;
-            bottom: 70px;
+            bottom: 0px;
             height: 40px;
             left: 0;
             position: absolute;
@@ -81,33 +95,37 @@
         }
 
         #details {
+            border: 2px solid #F0F0F0;
             left: 10px;
             position: relative;
-            top: 8px;
-            width: 29px;
+            top: 6px;
+            width: 25px;
         }
 
         #texteDetails {
-            left: 38px;
+            left: 40px;
             position: absolute;
             top: 13px;
         }
 
         #fermer {
+            border: 2px solid skyblue;
             position: absolute;
             right: 17px;
             top: 9px;
         }
 
         #pile {
-            background: none repeat scroll 0 0 red;
             bottom: 0;
-            height: 70px;
+            font-family: arial;
+            font-size: 15px;
             left: 0;
             overflow: auto;
+            padding-left: 3%;
+            padding-right: 3%;
             position: absolute;
-            width: 100%;
-            display:none;
+            width: 94%;
+            display: none;
         }
     </style>
 
@@ -116,128 +134,246 @@
         $.widget("divalto.divaltoErrorFatal", {
 
             options: {
+                fatale: true,
+                code: 0,
+                codesys: 0,
+                codecompljour: 0,
+                lieujour: 0,
+                adresse: 35,
+                details: "",
+                prog: "",
+                module: "",
+                texte: "",
                 titre: "Divalto",
-                texte: "Nom du fichier incorrect",//
-                prog: "Test.dhop",//
-                module: "Ysystem.dhop",//
-                date: "26/02/2013",//
-                adresse: "0x0095568",//
-                code: "0x0013", // pas sur
-                codesys: "---",
-                codecompljour: "2",
-                lieujour: "---"
+                date: "26/02/2013"
             },
 
-            etatPile:"hidden",
+            etatPile: "",
+            choixCourant: 0,    //0 représente "Fermer", 1 représente "details"
+            //ajoutervariable dimension
+            pile:""
 
             _create: function () {
+                this.etatPile = "hidden";
 
                 var cadre = $("<div id='cadre'></div>");
 
-
+                //icone en fonction de l'option "fatale"
                 var icone = $("<img id='icone'></img>");
-                icone.attr("src", "images/ICONERROR.png");     //images/" + nomIcon + ".png"
+                if (this.options.fatale == true)
+                    icone.attr("src", "images/ICONERROR.png");
+                else
+                    icone.attr("src", "images/ICONEXCLAMATION.png");
                 icone.appendTo(cadre);
 
+                //texteErreur
                 var texteErreur = $("<p id='texteErreur'></p>");
                 texteErreur.html(this.options.texte);
                 texteErreur.appendTo(cadre);
 
                 //espace du tableau
-                var table = $("<table></table>");
-                table.appendTo(cadre);
-                //ligne de "programme"
-                var ligneProgramme = $("<tr id='programme'></tr>");
-                var colonneNomProgramme = $("<td class='colonne1DeTable'>Programme</td>");
-                var colonneContenuProgramme = $("<td class='colonne2DeTable'></td>");
+                var table = $("<div id='table'></div>");
+                //premième ligne
+                var ligneProgramme = $("<div class='ligne'></div>");
+                var colonneNomProgramme = $("<p class='colonne1'>programme</p>");
+                var colonneContenuProgramme = $("<p class='colonne2'></p>");
                 colonneNomProgramme.appendTo(ligneProgramme);
                 colonneContenuProgramme.html(this.options.prog).appendTo(ligneProgramme);
                 ligneProgramme.appendTo(table);
-                //ligne de "module"
-                var ligneModule = $("<tr id='module'></tr>");
-                var colonneNomModule = $("<td class='colonne1DeTable'>Module</td>");
-                var colonneContenuModule = $("<td class='colonne2DeTable'></td>");
+                //deuxième ligne
+                var ligneModule = $("<div class='ligne'></div>");
+                var colonneNomModule = $("<p class='colonne1'>module</p>");
+                var colonneContenuModule = $("<p class='colonne2'></p></div>");
                 colonneNomModule.appendTo(ligneModule);
-                colonneContenuModule.html(this.options.module).appendTo(ligneModule);
+                var contenuModule = "---";
+                if (this.options.module != "" && this.options.module != this.options.prog)
+                    contenuModule = this.options.module;
+                colonneContenuModule.html(contenuModule).appendTo(ligneModule);
                 ligneModule.appendTo(table);
-                //ligne de "date"
-                var ligneDate = $("<tr id='date'></tr>");
-                var colonneNomDate = $("<td class='colonne1DeTable'>Date</td>");
-                var colonneContenuDate = $("<td class='colonne2DeTable'></td>");
+                //troisième ligne
+                var ligneDate = $("<div class='ligne'></div>");
+                var colonneNomDate = $("<p class='colonne1'>date</p>");
+                var colonneContenuDate = $("<p class='colonne2'></p>");
                 colonneNomDate.appendTo(ligneDate);
-                colonneContenuDate.html(this.options.module).appendTo(ligneDate);
+                colonneContenuDate.html(this.options.date).appendTo(ligneDate);
                 ligneDate.appendTo(table);
 
-                //espace des carrés
-                var adresse = $("<div class='carre'><BR>Adresse<BR><BR>" + this.options.adresse + "<BR><BR></div>");
+                table.appendTo(cadre);
+
+
+                //espace des carrés 
+                var adresseContenu = this.options.adresse == 0 ? "---" : "0x" + toHexadecimal(this.options.adresse, 8);
+                var adresse = $("<div class='carre'><BR>Adresse<BR><BR><BR>" + adresseContenu + "<BR><BR></div>");
                 adresse.appendTo(cadre);
-                var lieu = $("<div class='carre'><BR>Lieu<BR><BR>" + this.options.lieujour + "<BR><BR></div>");
+
+                var lieuContenu = this.options.lieujour == 0 ? "---" : this.options.lieujour.toString();
+                var lieu = $("<div class='carre'><BR>Lieu<BR><BR><BR>" + lieuContenu + "<BR><BR></div>");
                 lieu.appendTo(cadre);
-                var codeComplementaire = $("<div class='carre'><BR>Code complementaire<BR><BR>" + this.options.codecompljour + "<BR><BR></div>");
+
+                var codeComplementaireContenu = this.options.codecompljour == 0 ? "---" : this.options.codecompljour.toString();
+                var codeComplementaire = $("<div class='carre'><BR>Code complementaire<BR><BR><BR>" + codeComplementaireContenu + "<BR><BR></div>");
                 codeComplementaire.appendTo(cadre);
-                var codeSysteme = $("<div class='carre'><BR>Code système<BR><BR>" + this.options.codesys + "<BR><BR></div>");
+
+                var codeSystemeContenu = this.options.codesys == 0 ? "---" : "0x" + toHexadecimal(this.options.codesys, 4);
+                var codeSysteme = $("<div class='carre'><BR>Code système<BR><BR><BR>" + codeSystemeContenu + "<BR><BR></div>");
                 codeSysteme.appendTo(cadre);
-                var erreur = $("<div class='carre'><BR>Erreur<BR><BR>" + this.options.code + "<BR><BR></div>");
+
+                var erreurContenu = this.options.code == 0 ? "---" : "0x" + toHexadecimal(this.options.code, 4);
+                var erreur = $("<div class='carre'><BR>Erreur<BR><BR><BR>" + erreurContenu + "<BR><BR></div>");
+                erreur.css("border", "1px solid #FF7F00");
                 erreur.appendTo(cadre);
 
                 //espace des boutons
                 var espaceBouton = $("<div  id='espaceBouton'></div>");
                 var boutonDetail = $("<img id='details' src='images/toggle-down.png'></img>");
-                boutonDetail.appendTo(espaceBouton);
+
                 var texteDetail = $("<p id='texteDetails'>Details</p>");
-                texteDetail.appendTo(espaceBouton);
                 var boutonFermer = $("<button id='fermer'>Fermer</button>");
                 boutonFermer.button();
                 boutonFermer.appendTo(espaceBouton);
                 espaceBouton.appendTo(cadre);
+                //si le detail n'est pas vide, on affiche le boutonDetail afin d'afficher le pile
+                if (this.options.details != "") {
+                    boutonDetail.appendTo(espaceBouton);
+                    texteDetail.appendTo(espaceBouton);
+                }
 
-                //espace du pile
-
-                var pile = $("<div id='pile'>le contenu du pile</div>");
+                //espace de la pile
+                //box-sizing  
+                var pile = $("<div id='pile'>" + this.options.details + "<BR><BR></div>");
                 pile.appendTo(cadre);
 
-
                 this.element.append(cadre);
+                
+                cadre.dialog({ title: this.options.titre, width: 500, height: 300, minWidth: 404, minHeight: 280, resizable: false });
 
-                cadre.dialog({ title: this.options.titre, width: 404, height: 290, minWidth: 404, minHeight: 280 });
                 //changement de la partie "titre" en haut et le bouton "quitter" 
-                $("*.ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-icon-only.ui-dialog-titlebar-close").css("height", "12px").css("width", "38px").css("top", "5.5px");
+                $("*.ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-icon-only.ui-dialog-titlebar-close")
+                    .css("height", "12px").css("width", "38px").css("top", "5.5px");
                 $("*.ui-dialog-titlebar").css("background", "transparent").css("border", "none");
 
-                //$("#details").on("click", this, function (event) {
-                //    if (event.data.etatPile == "hidden") {
-                //        cadre.find("div#pile").show();
-                //        event.data.etatPile = "show";
+
+
+                //pour appliquer .focus()
+                boutonFermer.attr("tabindex", "0");
+                boutonDetail.attr("tabindex", "0");
+
+                ////événements du clavier
+                //this.element.keydown(this, function (event) {
+                //    //tant que le detail n'est pas vide, il existe deux boutons à choisir : boutonDetail et boutonFermer
+                //    if (event.data.options.details != "") {
+                //        //si on change le bouton à choisir entre "fermer" et "details"
+                //        if (event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40) {
+                //            if (event.data.choixCourant == 0) {
+                //                boutonDetail.css("border", "2px solid skyblue");
+                //                boutonFermer.css("border", "2px solid #F0F0F0");
+                //                boutonDetail.focus();
+                //                event.data.choixCourant = 1;
+                //            }
+                //            else {
+                //                boutonFermer.css("border", "2px solid skyblue");
+                //                boutonDetail.css("border", "2px solid #F0F0F0");
+                //                boutonFermer.focus();
+                //                event.data.choixCourant = 0;
+                //            }
+                //        }
                 //    }
-                //    else {
-                //        cadre.find("div#pile").slideUp();
-                //        event.data.etatPile = "hidden";
+                //    //si on clique sur "Entrée" ou "Espace", on fait le choix en cliquant
+                //    if (event.keyCode == 13 || event.keyCode == 32) {
+                //        if (event.data.choixCourant == 0) {
+                //            boutonFermer.click();
+                //        }
+                //        else {
+                //            boutonDetail.click();
+
+                //        }
                 //    }
+                //    //si on clique sur "Ech", on fait "close"
+                //    if (event.keyCode == 27) {
+                //        cadre.dialog("close");
+                //    }
+
                 //});
 
-                cadre.find("img#details").on("click", this, function (event) {
-                    if (event.data.etatPile == "hidden") {
-cadre.find("div#pile").slideUp("slow");
-                        event.data.etatPile = "showed";
+                //événement du souris
+                //lors que le souris arrête sur le bouton, sa bordure devient bleu
+                boutonDetail.on("mouseover", this, function (event) {
+                    boutonDetail.css("background", "skyblue");
+                });
+                //lors que le souris sort du bouton, la bordure bleu revient au bouton courant
+                boutonDetail.on("mouseout", this, function (event) {
+                    boutonDetail.css("background", "#F0F0F0");
+                });
 
+                //afficher ou cacher "pile"
+                boutonDetail.on("click", this, function (event) {
+                    var heightPile = pile.height();  //
+                    //la hauteur originale du widget égale 300px
+                    var heightWidgetOriginaire = 300;
+                    var heightWidget = heightPile + heightWidgetOriginaire;
+                    var hauteurEspaceBlanc = 20;
+                    var hauteurEcranMin = heightWidgetOriginaire + hauteurEspaceBlanc;
+                    //si le tag "pile" est cahché
+                    if (event.data.etatPile == "hidden") {
+                        //si la hauteur du widget est inférieure à celle de l'écran, affichage normal
+                        if (heightWidget < $(document).height() - hauteurEspaceBlanc || $(document).height() <= hauteurEcranMin) {
+                            //2px afin d'éviter l'apparition de l'ascenseur dans quelques navigateurs
+                            pile.css("height", heightPile + 2);
+                            cadre.dialog({ height: heightWidget });
+                            espaceBouton.css("bottom", heightPile + 2);
+                        }
+                            //si la hauteur du widget est supérieure à celle de l'écran, on limite la hauteur de tag "pile"
+                        else {
+                            cadre.dialog({ height: $(document).height() - hauteurEspaceBlanc });
+                            pile.css("height", $(document).height() - hauteurEspaceBlanc - heightWidgetOriginaire)
+                            espaceBouton.css("bottom", $(document).height() - hauteurEspaceBlanc - heightWidgetOriginaire);
+                        }
+                        pile.show();
+                        event.data.etatPile = "show";
                     }
+                        //si le tag "pile" est affiché
                     else {
-                        
-cadre.find("div#pile").slideDown("slow");
+                        cadre.dialog({ height: heightWidgetOriginaire });
+                        espaceBouton.css("bottom", "0");
+                        pile.hide();
                         event.data.etatPile = "hidden";
                     }
-                })
+                });
+
+                //click sur le bouton "Fermer" entraîne à la fermeture
+                boutonFermer.on("click", this, function (event) {
+                    cadre.dialog("close");
+                });
+
+                //convertir les valeurs en hexadecimal avec les chiffres demandées
+                function toHexadecimal(valeur, nombreChiffre) {
+                    var hexa = valeur.toString(16);
+                    var length = hexa.length;
+                    while (length < nombreChiffre) {
+                        hexa = "0" + hexa;
+                        length++;
+                    }
+                    return hexa;
+                }
+
             }
-
-
-            
 
 
         });
 
 
         $(function () {
-            $("body").divaltoErrorFatal();
+            $("body").divaltoErrorFatal({
+                //fatale:false,
+                titre: "Divalto",
+                texte: "Nom du fichier incorrect",
+                prog: "Test.dhop",
+                code: 19,
+                codecompljour: 2,
+                details: "Although style and script tags will report a value for .width() or height() when absolutely positioned and given display:block, it is strongly discouraged to call those methods on these tags. In addition to being a bad practice, the results may also prove unreliable.A Although style and script tags will report a value for .width() or height() when absolutely positioned and given display:block, it is strongly discouraged to call those methods on these tags. In addition to being a bad practice, the results may also prove unreliable.l Although style and script tags will report a value for .width() or height() when absolutely positioned and given display:block, it is strongly discouraged to call those methods on these tags. In addition to being a bad practice, the results may also prove unreliable.t Although style and script tags will report a value for .width() or height() when absolutely positioned and given display:block, it is strongly discouraged to call those methods on these tags. In addition to being a bad practice, the results may also prove unreliable.hough style and script tags will report a value for .width() or height() when absolutely positioned and given display:block, it is strongly discouraged to call those methods on these tags. In addition to being a bad practice, the results may also prove unreliable.  Although style and script tags will report a value for .width() or height() when absolutely positioned and given display:block, it is strongly discouraged to call those methods on these tags. In addition to being a bad practice, the results may also prove unreliable.A Although style and script tags will report a value for .width() or height() when absolutely positioned and given display:block, it is strongly discouraged to call those methods on these tags. In addition to being a bad practice, the results may also prove unreliable.l Although style and script tags will report a value for .width() or height() when absolutely positioned and given display:block, it is strongly discouraged to call those methods on these tags. In addition to being a bad practice, the results may also prove unreliable.t Although style and script tags will report a value for .width() or height() when absolutely positioned and given display:block, it is strongly discouraged to call those methods on these tags. In addition to being a bad practice, the results may also prove unreliable.h Although style and script tags will report a value for .width() or height() when absolutely positioned and given display:block, it is strongly discouraged to call those methods on these tags. In addition to being a bad practice, the results may also prove unreliable.ough  Although style and script tags will report a value for .width() or height() when absolutely positioned and given display:block, it is strongly discouraged to call those methods on these tags. In addition to being a bad practice, the results may also prove unreliable.style and script tags will report a value for .width() or height() when absolutely positioned and given display:block, it is strongly discouraged to call those methods on these tags. In addition to being a bad practice, the results may also prove unreliable.",
+                //details: "le contenu pile",
+                //details: "Although style and script tags will report a value for .width() or height() when absolutely positioned and given display:block, it is strongly discouraged to call those methods on these tags.",
+            });
 
         });
 
