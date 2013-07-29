@@ -1,0 +1,236 @@
+﻿<!--<!DOCTYPE html>-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/ResetStyles.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/DivaltoDefault.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="Scripts/jQuery/css/smoothness/jquery-ui-1.10.1.custom.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="Scripts/jqgrid/css/ui.jqgrid.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/divaltoWidgets/onglet.css" />
+
+    <script type="text/javascript" src="scripts/jquery/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="scripts/jquery/jquery-ui-1.10.1.custom.js"></script>
+    <script src="Scripts/localStorage/jquery.storage.js" type="text/javascript"></script>
+    <script src="Scripts/divaltoWidgets/onglet.js" type="text/javascript"></script>
+
+    <!-- Pour être certain que IE execute la bonne version du fichier. Penser a effacer le cache une fois qu'on active cette option
+	-->
+    <meta http-equiv="Pragma" content="no-cache" />
+
+</head>
+<body>
+
+    <style>
+        #divalto-comboBox-box {
+            border: 1px solid skyblue;
+            font-family: arial;
+            height: 50px;
+            line-height: 50px;
+            width: 150px;
+            top: 400px;
+            left: 200px;
+            position: absolute;
+        }
+
+        #divalto-comboBox-multichoix {
+            background: none repeat scroll 0 0 #F0F0F0;
+            border: 1px solid black;
+            width: 150px;
+            position: absolute;
+        }
+
+        .divalto-comboBox-multichoix {
+            font-family: arial;
+            height: 20px;
+            line-height: 20px;
+        }
+    </style>
+
+
+    <script>
+        $.widget("divalto.divaltoCamboBox", {
+
+            options: {
+                autorisation: true,
+                choix: ["acheté", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours"],
+                //choix:["acheté", "fabriqué", "fantôme", "service"],
+                choixCourant: 1,
+
+            },
+
+            etatMultichoix: "",
+
+            _create: function () {
+                etatMultichoix = "hidden";
+
+
+                var box = $("<div id='divalto-comboBox-box'>" + this.options.choix[this.options.choixCourant - 1] + "</div>");
+                var image = $("<img src='images/arrow.png'></img>");
+                image.appendTo(box);
+
+
+                var multichoix = $("<div id='divalto-comboBox-multichoix'></div>");
+                for (var i = 0 ; i < this.options.choix.length ; i++) {
+                    multichoix.append($("<div class='divalto-comboBox-multichoix' id='" + i + "'>" + this.options.choix[i] + "</div>"));
+                }
+                multichoix.hide();
+
+
+                this.element.append(box);
+                this.element.append(multichoix);
+
+
+
+                $(document).click(function (event) {
+                    if (etatMultichoix != "hidden") {
+                        multichoix.hide();
+                        etatMultichoix = "hidden";
+                    }
+                });
+
+                //l'ouverture et la fermeture du "multichoix"
+                box.on("click", this, function (event) {
+                    if (event.data.options.autorisation == true && etatMultichoix == "hidden") {
+                        multichoix.empty();
+                        for (var i = 0 ; i < event.data.options.choix.length ; i++) {
+                            multichoix.append($("<div class='divalto-comboBox-multichoix' id=" + i + ">" + event.data.options.choix[i] + "</div>"));
+                        }
+                        changerLaTailleMultichoix();
+                        multichoix.slideDown();
+                        multichoix.scrollTop(1000);
+                        //colorer le choix courant
+                        multichoix.find("div").css({ "background": "#F0F0F0", "color": "black" });
+                        multichoix.find("#" + (event.data.options.choixCourant - 1).toString()).css({
+                            "background": "black",
+                            "color": "white"
+                        });
+                        etatMultichoix = "showed";
+                    }
+                    else {
+                        multichoix.hide();
+                        etatMultichoix = "hidden";
+                    }
+                    event.stopPropagation();
+                });
+
+                //événements du souris
+                multichoix.delegate("div", "click", this, function (event) {
+                    box.html($(this).html());
+                    multichoix.hide();
+                    etatMultichoix = "hidden";
+                    event.data.options.choixCourant = parseInt($(this).attr("id")) + 1;
+                });
+
+                multichoix.delegate("div", "mouseover", function (event) {
+                    multichoix.find("div").css({ "background": "#F0F0F0", "color": "black" });
+                    $(this).css({ "background": "black", "color": "white" });
+                });
+
+
+                //événement du clavier
+                this.element.keydown(this, function (event) {
+                    if (etatMultichoix == "showed") {
+                        //si on clique sur "haut"
+                        if (event.keyCode == 37 || event.keyCode == 38) {
+                            if (event.data.options.choixCourant != 1) {
+                                event.data.options.choixCourant--;
+                                multichoix.find("div").css({ "background": "#F0F0F0", "color": "black" });
+                                multichoix.find("#" + (event.data.options.choixCourant - 1)).css({ "background": "black", "color": "white" });
+                            }
+                            else {
+                                event.data.options.choixCourant = event.data.options.choix.length;
+                                multichoix.find("div").css({ "background": "#F0F0F0", "color": "black" });
+                                multichoix.find("#" + (event.data.options.choix.length - 1).toString()).css({ "background": "black", "color": "white" });
+                            }
+                        }
+                        //si on clique sur "bas"
+                        if (event.keyCode == 39 || event.keyCode == 40) {
+                            if (event.data.options.choixCourant != event.data.options.choix.length) {
+                                event.data.options.choixCourant++;
+                                multichoix.find("div").css({ "background": "#F0F0F0", "color": "black" });
+                                multichoix.find("#" + (event.data.options.choixCourant - 1)).css({ "background": "black", "color": "white" });
+                            }
+                            else {
+                                event.data.options.choixCourant = 1;
+                                multichoix.find("div").css({ "background": "#F0F0F0", "color": "black" });
+                                multichoix.find("#0").css({ "background": "black", "color": "white" });
+                            }
+                        }
+                        //si on clique sur "Entrée" ou "Espace", on choisit
+                        if (event.keyCode == 13 || event.keyCode == 32) {
+                            multichoix.find("#" + (event.data.options.choixCourant - 1)).click(); //?????????????????????????
+                        }
+                    }
+                })
+
+
+                //décider de dérouler vers haut ou bas
+                function changerLaTailleMultichoix() {
+                    var heightBox = box.height();
+                    var topBox = box.position().top;
+                    var leftBox = box.position().left;
+                    var heightMultichoix = multichoix.height();
+                    var heightEcran = $(document).height();
+                    //si le widget n'atteint pas le fond de l'écran 
+                    if (topBox + heightBox + heightMultichoix <= heightEcran)
+                        multichoix.css({ "top": topBox + heightBox, "left": leftBox, "margin-top": 0 });
+                    else {
+                        if (topBox - heightMultichoix > 0)
+                            multichoix.css({ "top": topBox, "left": leftBox, "margin-top": -heightMultichoix });
+                        else {
+                            if (topBox < heightEcran / 2)
+                                multichoix.css({
+                                    "top": topBox + heightBox,
+                                    "left": leftBox,
+                                    "height": heightEcran - topBox - heightBox - 10,
+                                    "overflow": "auto"
+                                });
+                            else
+                                multichoix.css({
+                                    "top": topBox, "left": leftBox,
+                                    "margin-top": -topBox + 10,
+                                    "height": topBox - 10,
+                                    "overflow": "auto"
+                                });
+
+                        }
+                    }
+                }
+            },
+
+            _setOption: function (key, value) {
+                switch (key) {
+                    case "choix": {
+                        if (value != undefined)
+                            this.options.choix = value;
+                        break;
+                    }
+                }
+            },
+
+            //open: function () {
+            //    etatMultichoix = "showed";
+            //},
+
+        });
+
+
+
+
+        $(function () {
+            $("#combo").divaltoCamboBox();
+            //$("#combo").divaltoCamboBox("open");
+            $("#combo").css("color", "red");
+            //$("#combo").divaltoCamboBox(
+            //    "option", "choix", ["acheté", "fabriqué", "fantôme", "service"]
+            //);
+
+        });
+
+    </script>
+
+    <div id="combo"></div>
+
+</body>
+</html>
