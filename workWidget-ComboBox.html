@@ -22,173 +22,361 @@
 <body>
 
     <style>
-        #divalto-comboBox-box {
-            border: 1px solid skyblue;
-            font-family: arial;
-            height: 50px;
-            line-height: 50px;
-            width: 150px;
-            top: 400px;
-            left: 200px;
+        .divalto-comboBox-box {
+            width: inherit;
+            height: inherit;
+            display: table;
             position: absolute;
+            font-size: inherit;
         }
 
-        #divalto-comboBox-multichoix {
-            background: none repeat scroll 0 0 #F0F0F0;
-            border: 1px solid black;
-            width: 150px;
-            position: absolute;
+        .divalto-comboBox-texte {
+            display: table-cell;
+            vertical-align: middle;
+            font-size:inherit;
+        }
+
+        .divalto-comboBox-cadreImage {
+            background: none repeat scroll 0 0 skyblue;
+            display: table-cell;
+            vertical-align: middle;
+            width: 30px;
+            text-align: center;
         }
 
         .divalto-comboBox-multichoix {
-            font-family: arial;
+            background: none repeat scroll 0 0 #F0F0F0;
+            border: 1px solid black;
+            width: inherit;
+            position: inherit;
+        }
+
+        .divalto-comboBox-choix {
             height: 20px;
             line-height: 20px;
         }
+
+        .divalto-comboBox-choixCourant {
+            background-color: black;
+            color: white;
+        }
+       
     </style>
 
 
     <script>
-        $.widget("divalto.divaltoCamboBox", {
+        //(function ($) {
+        //    var originalVal = $.fn.val;
+        //    $.fn.val = function (value) {
+        //        if (typeof value != 'undefined') {
+        //            var ret = originalVal.call(this, value);
+        //            this.trigger("val");
+        //            return ret;
+        //        }
+        //        return originalVal.call(this);
+        //    };
+        //})(jQuery);
+
+        (function ($) {
+            var originalVal = $.fn.val;
+            $.fn.val = function (value) {
+                if (typeof value != 'undefined') {
+                    var ret = originalVal.call(this, value);
+                    this.trigger("changeval");
+                    return ret;
+                }
+                return originalVal.call(this);
+            };
+        })(jQuery);
+
+        $.widget("divalto.divaltoComboBox", {
 
             options: {
-                autorisation: true,
-                choix: ["acheté", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours", "fabriqué", "fantôme", "service", "encours"],
-                //choix:["acheté", "fabriqué", "fantôme", "service"],
+                choix: "",
                 choixCourant: 1,
-
+                choixTexte: "",
+                notification:"false" //point d'arrêt si click
             },
 
-            etatMultichoix: "",
+            etatMultichoix: null,
+            cadre: null,
+            courant: null,
+            box: null,
+
 
             _create: function () {
-                etatMultichoix = "hidden";
+                var that = this;
 
+                that.etatMultichoix = "hidden";
 
-                var box = $("<div id='divalto-comboBox-box'>" + this.options.choix[this.options.choixCourant - 1] + "</div>");
-                var image = $("<img src='images/arrow.png'></img>");
-                image.appendTo(box);
+                //structure du widget
+                this.cadre = $("<div class='divalto-comboBox-box'></div>");
+                that.box = this.cadre;
+                that.box.attr("tabindex", "0"); //pour que l'événement du clavier marche toujours
 
-
-                var multichoix = $("<div id='divalto-comboBox-multichoix'></div>");
-                for (var i = 0 ; i < this.options.choix.length ; i++) {
-                    multichoix.append($("<div class='divalto-comboBox-multichoix' id='" + i + "'>" + this.options.choix[i] + "</div>"));
+                var texte = $("<div class='divalto-comboBox-texte'></div>");
+                if (this.options.choixTexte == true)
+                    texte.html(this.options.choix[this.options.choixCourant - 1]);
+                else {
+                    var choixTypeImageCourant = $("<img src='images/" + this.options.choix[this.options.choixCourant - 1] + "'></img>");
+                    texte.html(choixTypeImageCourant);
                 }
+                texte.appendTo(that.box);
+
+                var cadreImage = $("<div class='divalto-comboBox-cadreImage'></div>");
+                var image = $("<img src='images/arrow.png'></img>");
+                cadreImage.attr("tabindex", "0");
+                cadreImage.html(image);
+                cadreImage.appendTo(that.box);
+
+                var multichoix = $("<div class='divalto-comboBox-multichoix'></div>");
                 multichoix.hide();
 
-
-                this.element.append(box);
+                this.element.append(that.box);
                 this.element.append(multichoix);
 
 
-
+                //les fonctions
+                //click sur le reste de l'écran
                 $(document).click(function (event) {
-                    if (etatMultichoix != "hidden") {
-                        multichoix.hide();
-                        etatMultichoix = "hidden";
+                    if (that.etatMultichoix != "hidden") {
+                        multichoix.hide().empty();;
+                        that.etatMultichoix = "hidden";
                     }
                 });
 
+                //la hauteur de chaque choix et de "multichoix"
+                var heightChoix = null;
+                var heightMultichoix = null;
+
+                this.element.on("changeval", this, function (event) {
+                        self.changerChoixCourant(event.data.val());
+                });
+
+                //événements du souris
                 //l'ouverture et la fermeture du "multichoix"
-                box.on("click", this, function (event) {
-                    if (event.data.options.autorisation == true && etatMultichoix == "hidden") {
-                        multichoix.empty();
-                        for (var i = 0 ; i < event.data.options.choix.length ; i++) {
-                            multichoix.append($("<div class='divalto-comboBox-multichoix' id=" + i + ">" + event.data.options.choix[i] + "</div>"));
+                that.box.on("click", this, function (event, params) {
+                    var ok = true;
+                    if (that.etatMultichoix == "hidden") {
+                        if (params && params.trigger === true) {
+                            var ev = $.Event("ouvertureMultiChoix");
+                            that.box.trigger(ev);
+                            if (ev.isDefaultPrevented() == false)
+                                ok = false;
                         }
-                        changerLaTailleMultichoix();
-                        multichoix.slideDown();
-                        multichoix.scrollTop(1000);
-                        //colorer le choix courant
-                        multichoix.find("div").css({ "background": "#F0F0F0", "color": "black" });
-                        multichoix.find("#" + (event.data.options.choixCourant - 1).toString()).css({
-                            "background": "black",
-                            "color": "white"
-                        });
-                        etatMultichoix = "showed";
+                        if (ok === true) {
+                            that.courant = event.data.options.choixCourant;
+                            //si les choix sont les textes
+                            if (event.data.options.choixTexte == true)
+                                for (var i = 0 ; i < event.data.options.choix.length ; i++) {
+                                    var conteneurChoix = $("<div class='divalto-comboBox-choix' id=" + i + ">" + event.data.options.choix[i] + "<div>");
+                                    conteneurChoix.css("font-size", that.box.css("font-size"));
+                                    multichoix.append(conteneurChoix);
+                                }
+                            else
+                                for (var i = 0 ; i < event.data.options.choix.length ; i++) {
+                                    var choixTypeImage = $("<img src='images/" + event.data.options.choix[i] + "'></img>");
+                                    var conteneurChoix = $("<div class='divalto-comboBox-choix' id=" + i + "></div>");
+                                    choixTypeImage.appendTo(conteneurChoix);
+                                    conteneurChoix.appendTo(multichoix);
+                                }
+                            //dérouler le "multichoix" en fonction de l'écran 
+                            changerLaTailleMultichoix();
+
+                            heightChoix = multichoix.find("div").height();
+                            heightMultichoix = multichoix.height();
+                            multichoix.slideDown();
+                            //la hauteur de l'ascenseur en fonction du choix courant
+                            var a = heightChoix * (event.data.options.choixCourant - 1);
+                            multichoix.scrollTop(a);
+                            //colorer le choix courant
+                            multichoix.find("#" + (event.data.options.choixCourant - 1).toString()).addClass("divalto-comboBox-choixCourant");
+
+                            that.box.trigger("multichoixOuvert");
+
+                            that.etatMultichoix = "showed";
+                        }
                     }
                     else {
-                        multichoix.hide();
-                        etatMultichoix = "hidden";
+                        multichoix.empty().hide();
+                        that.etatMultichoix = "hidden";
+                    }
+                    event.stopPropagation();
+                });
+                // notification     correct  ???
+                that.box.on("multichoixOuvert",this, function (event) {
+                    event.data.options.notification = true;
+                });
+
+                //changer la couleur de la flèche lors de "hover" sur le widget
+                that.box.hover(
+                    function () { cadreImage.animate({ "backgroundColor": "#FFA500" }, 100); },
+                    function () { cadreImage.animate({ "backgroundColor": "#87ceeb" }, 100); }
+                        );
+                
+                multichoix.on("click", this, function (event) {
+                    var t = $(event.target);
+                    if (t.attr("class") == "divalto-comboBox-choix divalto-comboBox-choixCourant") {  //à améliorer
+                        texte.html(t.html());
+                        multichoix.empty().hide();
+                        that.etatMultichoix = "hidden";
+                        event.data.options.choixCourant = parseInt(t.attr("id")) + 1;
                     }
                     event.stopPropagation();
                 });
 
-                //événements du souris
-                multichoix.delegate("div", "click", this, function (event) {
-                    box.html($(this).html());
-                    multichoix.hide();
-                    etatMultichoix = "hidden";
-                    event.data.options.choixCourant = parseInt($(this).attr("id")) + 1;
+                multichoix.on("mouseover", this, function (event) {
+                    var t = $(event.target);
+                    if (t.attr("class") == "divalto-comboBox-choix") {
+                        multichoix.find("#" + (that.courant - 1)).removeClass("divalto-comboBox-choixCourant");
+                        t.addClass("divalto-comboBox-choixCourant");
+                        that.courant = parseInt(t.attr("id")) + 1;
+                    }
                 });
 
-                multichoix.delegate("div", "mouseover", function (event) {
-                    multichoix.find("div").css({ "background": "#F0F0F0", "color": "black" });
-                    $(this).css({ "background": "black", "color": "white" });
-                });
-
+                
 
                 //événement du clavier
                 this.element.keydown(this, function (event) {
-                    if (etatMultichoix == "showed") {
-                        //si on clique sur "haut"
-                        if (event.keyCode == 37 || event.keyCode == 38) {
-                            if (event.data.options.choixCourant != 1) {
-                                event.data.options.choixCourant--;
-                                multichoix.find("div").css({ "background": "#F0F0F0", "color": "black" });
-                                multichoix.find("#" + (event.data.options.choixCourant - 1)).css({ "background": "black", "color": "white" });
+                    //vérifier si "alt" est enfoncé
+                    if (event.altKey) {
+                        if (event.keyCode == 38 || event.keyCode == 40)
+                            that.box.click();
+                    }
+                    else {
+                        //vérifier si le "multichoix" est affiché
+                        if (that.etatMultichoix == "showed") {
+                            var heightMultichoix = multichoix.height();
+                            var topAscenseur = multichoix.scrollTop();
+                            var premier = topAscenseur / heightChoix;
+                            var dernier = premier + heightMultichoix / heightChoix;
+                            //si on clique sur "haut"
+                            if (event.keyCode == 37 || event.keyCode == 38) {
+                                if (that.courant != 1) {
+                                    that.courant--;
+                                    clavierShowed();
+                                }
                             }
-                            else {
-                                event.data.options.choixCourant = event.data.options.choix.length;
-                                multichoix.find("div").css({ "background": "#F0F0F0", "color": "black" });
-                                multichoix.find("#" + (event.data.options.choix.length - 1).toString()).css({ "background": "black", "color": "white" });
+                            //si on clique sur "bas"
+                            if (event.keyCode == 39 || event.keyCode == 40) {
+                                if (that.courant != event.data.options.choix.length) {
+                                    that.courant++;
+                                    clavierShowed();
+                                }
+                            }
+                            //page préc 
+                            if (event.keyCode == 33) {
+                                if (that.courant - heightMultichoix / heightChoix > 0) {
+                                    that.courant -= parseInt((heightMultichoix +0.5)/ heightChoix) - 1;
+                                    clavierShowed();
+                                }
+                                else {
+                                    that.courant = 1;
+                                    clavierShowed();
+                                }
+                            }
+                            //page suiv
+                            if (event.keyCode == 34) {
+                                if (that.courant + heightMultichoix / heightChoix < event.data.options.choix.length) {
+                                    that.courant += parseInt(heightMultichoix / heightChoix) - 1;
+                                    clavierShowed();
+                                }
+                                else {
+                                    that.courant = event.data.options.choix.length;
+                                    clavierShowed();
+                                }
+                            }
+
+                            //Fin
+                            if (event.keyCode == 35) {
+                                that.courant = event.data.options.choix.length;
+                                clavierShowed();
+                            }
+                            //Orig
+                            if ( event.keyCode == 36) {
+                                that.courant = 1;
+                                clavierShowed();
+                            }
+                            //si on clique sur "Entrée" ou "Espace", on choisit
+                            if (event.keyCode == 13 || event.keyCode == 32) {
+                                multichoix.find("#" + (that.courant - 1)).click();
                             }
                         }
-                        //si on clique sur "bas"
-                        if (event.keyCode == 39 || event.keyCode == 40) {
-                            if (event.data.options.choixCourant != event.data.options.choix.length) {
-                                event.data.options.choixCourant++;
-                                multichoix.find("div").css({ "background": "#F0F0F0", "color": "black" });
-                                multichoix.find("#" + (event.data.options.choixCourant - 1)).css({ "background": "black", "color": "white" });
+                            //si le multichoix est caché
+                        else {
+                            //gauche ou haut
+                            if (event.keyCode == 37 || event.keyCode == 38) {
+                                if (event.data.options.choixCourant != 1) {
+                                    event.data.options.choixCourant--;
+                                    clavierHide();
+
+                                }
                             }
-                            else {
+                            //droite ou bas
+                            if (event.keyCode == 39 || event.keyCode == 40) {
+                                if (event.data.options.choixCourant != event.data.options.choix.length) {
+                                    event.data.options.choixCourant++;
+                                    clavierHide();
+                                }
+                            }
+                            //Orig
+                            if (event.keyCode == 36) {
                                 event.data.options.choixCourant = 1;
-                                multichoix.find("div").css({ "background": "#F0F0F0", "color": "black" });
-                                multichoix.find("#0").css({ "background": "black", "color": "white" });
+                                clavierHide();
                             }
-                        }
-                        //si on clique sur "Entrée" ou "Espace", on choisit
-                        if (event.keyCode == 13 || event.keyCode == 32) {
-                            multichoix.find("#" + (event.data.options.choixCourant - 1)).click(); //?????????????????????????
+                            //Fin
+                            if (event.keyCode == 35) {
+                                event.data.options.choixCourant = event.data.options.choix.length;
+                                clavierHide();
+                            }
                         }
                     }
-                })
+                });
 
+                //this.element.on("changeval", this, function (event) {
+                //    var valeur = event.data.element.val()
+                //        event.data.Val(valeur);
+                //});
+
+                //i numéro du choix
+                function visible(i) {
+                    var topPremierAffiche = multichoix.scrollTop();
+                    var topDernierAffiche = multichoix.scrollTop() + heightMultichoix;
+                    var topChoixCourant = heightChoix * (i - 1);
+                    var bottomChoixCourant = topChoixCourant + heightChoix;
+                    if (topChoixCourant < topPremierAffiche) {
+                        multichoix.scrollTop(topChoixCourant);
+                    }
+                    else if (topChoixCourant > topDernierAffiche || bottomChoixCourant > topDernierAffiche) {
+                        multichoix.scrollTop(topChoixCourant + heightChoix - heightMultichoix);
+                    }
+
+
+                }
 
                 //décider de dérouler vers haut ou bas
                 function changerLaTailleMultichoix() {
-                    var heightBox = box.height();
-                    var topBox = box.position().top;
-                    var leftBox = box.position().left;
+                    var heightBox = that.box.height();
+                    var topBox = that.box.offset().top;
+                    var leftBox = that.box.offset().left;
                     var heightMultichoix = multichoix.height();
                     var heightEcran = $(document).height();
                     //si le widget n'atteint pas le fond de l'écran 
                     if (topBox + heightBox + heightMultichoix <= heightEcran)
-                        multichoix.css({ "top": topBox + heightBox, "left": leftBox, "margin-top": 0 });
+                        multichoix.css({ "top": heightBox, "margin-top": 0 });
                     else {
                         if (topBox - heightMultichoix > 0)
-                            multichoix.css({ "top": topBox, "left": leftBox, "margin-top": -heightMultichoix });
+                            multichoix.css({ "top": 0, "margin-top": -heightMultichoix });
                         else {
                             if (topBox < heightEcran / 2)
                                 multichoix.css({
-                                    "top": topBox + heightBox,
-                                    "left": leftBox,
+                                    "top": heightBox,
                                     "height": heightEcran - topBox - heightBox - 10,
                                     "overflow": "auto"
                                 });
                             else
                                 multichoix.css({
-                                    "top": topBox, "left": leftBox,
+                                    "top": 0,
                                     "margin-top": -topBox + 10,
                                     "height": topBox - 10,
                                     "overflow": "auto"
@@ -197,6 +385,25 @@
                         }
                     }
                 }
+                
+                function clavierShowed() {  //à renommer 
+                    multichoix.find("div").removeClass("divalto-comboBox-choixCourant");
+                    multichoix.find("#" + (that.courant - 1)).addClass("divalto-comboBox-choixCourant");
+                    visible(that.courant);
+                }
+
+                function clavierHide() {
+                    if (that.options.choixTexte == true)
+                        texte.html(that.options.choix[that.options.choixCourant - 1]);
+                    else {
+                        choixTypeImageCourant = $("<img src='images/" + that.options.choix[that.options.choixCourant - 1] + "'></img>");
+                        texte.html(choixTypeImageCourant);
+                    }
+                }
+            },
+
+            changerChoixCourant: function (i) {
+                this.options.choixCourant = i;
             },
 
             _setOption: function (key, value) {
@@ -209,28 +416,57 @@
                 }
             },
 
-            //open: function () {
-            //    etatMultichoix = "showed";
-            //},
+            Val: function (i) {
+                var images = this.element.find("img");
+                $(images[i]).attr("src", "images/radio1.png");
+                $(images[this.options.valeurCourante]).attr("src", "images/radio0.png");
+                this.options.valeurCourante = i;
+            },
 
+            open: function (avecTrigger) {
+                this.box.trigger("click", { "avecTrigger": avecTrigger });
+            }
         });
 
 
 
 
         $(function () {
-            $("#combo").divaltoCamboBox();
-            //$("#combo").divaltoCamboBox("open");
-            $("#combo").css("color", "red");
-            //$("#combo").divaltoCamboBox(
-            //    "option", "choix", ["acheté", "fabriqué", "fantôme", "service"]
-            //);
+            $("#combo").divaltoComboBox({
+                choixTexte: true,
+                choix: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S"],
+                //choix: ["acheté", "fabriqué", "fantôme", "service"],
+            });
 
+
+            //$("#combo").divaltoComboBox({
+            //    choixTexte: false,
+            //    choix: ["majeur.bmp", "DRT.png"]
+            //});
+
+
+            //$("#combo").divaltoComboBox("open");
+
+            $("#combo")
+                .width(300).height(100)
+                .css("position", "absolute")
+                .css("top", 200)
+                .css("left", 200)
+                .css("color", "red")
+                .css("background-color", "yellow")
+                .css("font-size","60px")          
+                .css("border", " 1px solid skyblue")
+                .css("font-family", "arial")
+            ;
+            $("#combo").on("ouvertureMultiChoix", function (event) {
+                alert("ouverture");
+                event.preventDefault();
+                event.stopPropagation();
+                $("#combo").divaltoComboBox("open", "true");
+            });
         });
-
     </script>
 
-    <div id="combo"></div>
-
+    <div id='combo'></div>
 </body>
 </html>
